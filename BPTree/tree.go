@@ -54,7 +54,7 @@ type positionStr struct {
 
 func newStack() Stack {
 	return Stack{
-		store: make([]positionStr, 4),
+		store: make([]positionStr, 0, 4),
 	}
 }
 
@@ -110,10 +110,10 @@ func (t *Tree) Insert(key, value int) {
 
 			current.node.pointer += insert(current.node.items, middleKey, current.position)
 			chIndex := childrenIndex(middleKey.key, current.node.items[current.position].key, current.position)
-			insertChildren(current.node.children, temp.node, chIndex) //insert pointer on children
+			insertChildren(current.node.children, nodeChildren, chIndex) //insert pointer on children
 
 			if current.node.pointer < t.degree {
-				fmt.Println("yes")
+				fmt.Println("yes", current.node)
 				return
 			}
 
@@ -162,10 +162,10 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	current.pointer += insert(current.items, item, position)
 
 	if current.pointer < degree {
-		fmt.Println(current)
+		fmt.Println("leaf", current)
 		return item, nil //
 	}
-	fmt.Println(current)
+	fmt.Println("leaf splitNode:", current, &current)
 
 	//Split
 	newNode := newNode(degree)
