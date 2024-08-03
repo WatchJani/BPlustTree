@@ -24,7 +24,7 @@ func main() {
 	// fmt.Println(list)
 
 	tree := BPTree.New(5)
-	for range 15 {
+	for range 50 {
 		tree.Insert(rand.Intn(120), 52)
 	}
 }

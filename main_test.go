@@ -101,11 +101,11 @@ func BenchmarkInsert(b *testing.B) {
 func BenchmarkInsertBPTree(b *testing.B) {
 	b.StopTimer()
 
-	tree := BPTree.New(1000)
+	tree := BPTree.New(50)
 
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		tree.Insert(rand.Intn(150), 5)
+		tree.Insert(rand.Intn(10000000), 5)
 	}
 }

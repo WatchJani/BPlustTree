@@ -2,7 +2,6 @@ package BPTree
 
 import (
 	"errors"
-	"fmt"
 )
 
 type Tree struct {
@@ -113,11 +112,23 @@ func (t *Tree) Insert(key, value int) {
 			insertChildren(current.node.children, nodeChildren, chIndex) //insert pointer on children
 
 			if current.node.pointer < t.degree {
-				fmt.Println("yes", current.node)
+				// fmt.Println("yes", current.node)
 				return
 			}
 
+			middle := t.degree / 2
+			middleKey = current.node.items[middle]
+
 			//split
+			newNode := newNode(t.degree)
+			newNode.pointer += migrateElement(newNode.items, current.node.items[:middle], 0) //migrate half element to left child node
+			migrateChildren(newNode.children, current.node.children[:middle], 0)
+			//update children
+			current.node.pointer -= deleteElement(current.node.items, 0, current.node.pointer-middle)
+			migrateChildren(newNode.children, current.node.children[middle:], 0)
+			//update children
+
+			nodeChildren = &newNode
 		}
 
 		rootNode := newNode(t.degree) // new root node
@@ -126,8 +137,8 @@ func (t *Tree) Insert(key, value int) {
 		rootNode.children[1] = current.node
 		t.root = &rootNode
 
-		fmt.Println("root:", rootNode)
-		fmt.Println("=============================")
+		// fmt.Println("root:", rootNode)
+		// fmt.Println("=============================")
 	}
 }
 
@@ -139,9 +150,15 @@ func childrenIndex(key, value, index int) int {
 	return index
 }
 
+// fix this func
 func insertChildren(list []*Node, insert *Node, position int) int {
 	copy(list[position+1:], list[position:])
 	return copy(list[position:], []*Node{insert})
+}
+
+// fix this func
+func migrateChildren(list, migrateElement []*Node, position int) int {
+	return copy(list[position:], migrateElement)
 }
 
 func insert(list []item, insert item, position int) int {
@@ -162,10 +179,10 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	current.pointer += insert(current.items, item, position)
 
 	if current.pointer < degree {
-		fmt.Println("leaf", current)
+		// fmt.Println("leaf", current)
 		return item, nil //
 	}
-	fmt.Println("leaf splitNode:", current, &current)
+	// fmt.Println("leaf splitNode:", current, &current)
 
 	//Split
 	newNode := newNode(degree)
@@ -175,7 +192,7 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	current.pointer -= deleteElement(current.items, 0, current.pointer-middle-1)
 
 	//fix update with all nodes around current node
-	newNode.nextNode = current
+	newNode.nextNodeL = current
 
 	return current.items[0], &newNode
 }

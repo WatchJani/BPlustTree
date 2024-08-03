@@ -1,10 +1,11 @@
 package BPTree
 
 type Node struct {
-	items    []item
-	children []*Node
-	nextNode *Node
-	pointer  int
+	items     []item
+	children  []*Node
+	nextNodeL *Node
+	nextNodeR *Node
+	pointer   int
 }
 
 func newNode(degree int) Node {
