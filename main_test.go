@@ -101,7 +101,7 @@ func BenchmarkInsert(b *testing.B) {
 func BenchmarkInsertBPTree(b *testing.B) {
 	b.StopTimer()
 
-	tree := BPTree.New(50)
+	tree := BPTree.New(500)
 
 	b.StartTimer()
 

@@ -124,7 +124,7 @@ func (t *Tree) Insert(key, value int) {
 
 			current.node.pointer += insert(current.node.items, middleKey, current.position)
 			chIndex := childrenIndex(middleKey.key, current.node.items[current.position].key, current.position)
-			insertChildren(current.node.children, nodeChildren, chIndex) //insert pointer on children
+			insert(current.node.children, nodeChildren, chIndex) //insert pointer on children
 
 			if current.node.pointer < t.degree {
 				return
@@ -135,11 +135,11 @@ func (t *Tree) Insert(key, value int) {
 
 			//split
 			newNode := newNode(t.degree)
-			newNode.pointer += migrateElement(newNode.items, current.node.items[:middle], 0) //migrate half element to left child node
-			migrateChildren(newNode.children, current.node.children[:middle], 0)
+			newNode.pointer += migrate(newNode.items, current.node.items[:middle], 0) //migrate half element to left child node
+			migrate(newNode.children, current.node.children[:middle+1], 0)
 
 			current.node.pointer -= deleteElement(current.node.items, 0, current.node.pointer-middle)
-			migrateChildren(current.node.children, current.node.children[middle:], 0)
+			migrate(current.node.children, current.node.children[middle:], 0)
 
 			nodeChildren = &newNode
 		}
@@ -160,23 +160,12 @@ func childrenIndex(key, value, index int) int {
 	return index
 }
 
-// fix this func
-func insertChildren(list []*Node, insert *Node, position int) int {
+func insert[T any](list []T, insert T, position int) int {
 	copy(list[position+1:], list[position:])
-	return copy(list[position:], []*Node{insert})
+	return copy(list[position:], []T{insert})
 }
 
-// fix this func
-func migrateChildren(list, migrateElement []*Node, position int) int {
-	return copy(list[position:], migrateElement)
-}
-
-func insert(list []item, insert item, position int) int {
-	copy(list[position+1:], list[position:])
-	return copy(list[position:], []item{insert})
-}
-
-func migrateElement(list, migrateElement []item, position int) int {
+func migrate[T any](list, migrateElement []T, position int) int {
 	return copy(list[position:], migrateElement)
 }
 
@@ -196,7 +185,7 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	newNode := newNode(degree)
 	middle := degree / 2 //Check
 
-	newNode.pointer += migrateElement(newNode.items, current.items[:middle], 0)
+	newNode.pointer += migrate(newNode.items, current.items[:middle], 0)
 	current.pointer -= deleteElement(current.items, 0, current.pointer-middle-1)
 
 	if current.nextNodeL != nil {

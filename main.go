@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"math/rand"
 	"root/BPTree"
 )
 
@@ -25,18 +25,11 @@ func main() {
 
 	//error with 13 elements and new root element
 	tree := BPTree.New(5)
-	for index := range 1500000 {
-		tree.Insert(index, 52)
+	for  range 100 {
+		tree.Insert(rand.Intn(1000000), 52)
 	}
 
-	value, err := tree.Find(150)
-	if err != nil {
-		return
-	}
-
-	fmt.Println(value)
-
-	// tree.TestFunc()
+	tree.TestFunc()
 }
 
 func Insert(list []int, insert, position int) int {
