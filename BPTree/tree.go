@@ -2,6 +2,7 @@ package BPTree
 
 import (
 	"errors"
+	"fmt"
 )
 
 type Tree struct {
@@ -191,8 +192,22 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	newNode.pointer += migrateElement(newNode.items, current.items[:middle], 0)
 	current.pointer -= deleteElement(current.items, 0, current.pointer-middle-1)
 
-	//fix update with all nodes around current node
-	newNode.nextNodeL = current
+	if current.nextNodeL != nil {
+		newNode.nextNodeL = current.nextNodeL  //left connection
+		current.nextNodeL.nextNodeR = &newNode //right connection prevues left node to new node
+	}
+
+	current.nextNodeL = &newNode //left connection
+	newNode.nextNodeR = current  //right connection
 
 	return current.items[0], &newNode
+}
+
+func (t *Tree) TestFunc() {
+	current := t.root
+	for current.children[0] != nil {
+		current = current.children[0]
+	}
+
+	fmt.Println(current)
 }

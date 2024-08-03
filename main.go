@@ -24,9 +24,11 @@ func main() {
 	// fmt.Println(list)
 
 	tree := BPTree.New(5)
-	for range 50 {
-		tree.Insert(rand.Intn(120), 52)
+	for range 5 {
+		tree.Insert(rand.Intn(100000), 52)
 	}
+
+	tree.TestFunc()
 }
 
 type SearchFn func([]int, int) int
