@@ -1,7 +1,6 @@
 package main
 
 import (
-	"math/rand"
 	"root/BPTree"
 )
 
@@ -23,9 +22,10 @@ func main() {
 
 	// fmt.Println(list)
 
+	//error with 13 elements and new root element
 	tree := BPTree.New(5)
-	for range 5 {
-		tree.Insert(rand.Intn(100000), 52)
+	for index := range 1500000 {
+		tree.Insert(index, 52)
 	}
 
 	tree.TestFunc()

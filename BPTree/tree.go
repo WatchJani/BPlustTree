@@ -124,10 +124,9 @@ func (t *Tree) Insert(key, value int) {
 			newNode := newNode(t.degree)
 			newNode.pointer += migrateElement(newNode.items, current.node.items[:middle], 0) //migrate half element to left child node
 			migrateChildren(newNode.children, current.node.children[:middle], 0)
-			//update children
+
 			current.node.pointer -= deleteElement(current.node.items, 0, current.node.pointer-middle)
-			migrateChildren(newNode.children, current.node.children[middle:], 0)
-			//update children
+			migrateChildren(current.node.children, current.node.children[middle:], 0)
 
 			nodeChildren = &newNode
 		}
@@ -209,5 +208,14 @@ func (t *Tree) TestFunc() {
 		current = current.children[0]
 	}
 
-	fmt.Println(current)
+	var counter int
+
+	for current != nil {
+		for _, value := range current.items[:current.pointer] {
+			counter++
+			fmt.Println(counter, value)
+		}
+		fmt.Println("======")
+		current = current.nextNodeR
+	}
 }
