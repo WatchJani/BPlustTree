@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"root/BPTree"
 )
 
@@ -28,10 +29,15 @@ func main() {
 		tree.Insert(index, 52)
 	}
 
-	tree.TestFunc()
-}
+	value, err := tree.Find(150)
+	if err != nil {
+		return
+	}
 
-type SearchFn func([]int, int) int
+	fmt.Println(value)
+
+	// tree.TestFunc()
+}
 
 func Insert(list []int, insert, position int) int {
 	copy(list[position+1:], list[position:])

@@ -75,6 +75,20 @@ func (s *Stack) Pop() (positionStr, error) {
 	return pop, nil
 }
 
+func (t *Tree) Find(key int) (int, error) {
+	for next := t.root; next != nil; {
+		index, found := next.search(key)
+
+		if found {
+			return next.items[index].value, nil
+		}
+
+		next = next.children[index]
+	}
+
+	return -1, errors.New("key not found")
+}
+
 func (t *Tree) Insert(key, value int) {
 	var (
 		position int
@@ -113,7 +127,6 @@ func (t *Tree) Insert(key, value int) {
 			insertChildren(current.node.children, nodeChildren, chIndex) //insert pointer on children
 
 			if current.node.pointer < t.degree {
-				// fmt.Println("yes", current.node)
 				return
 			}
 
@@ -131,14 +144,11 @@ func (t *Tree) Insert(key, value int) {
 			nodeChildren = &newNode
 		}
 
-		rootNode := newNode(t.degree) // new root node
+		rootNode := newNode(t.degree)
 		rootNode.pointer += insert(rootNode.items, middleKey, 0)
 		rootNode.children[0] = nodeChildren
 		rootNode.children[1] = current.node
 		t.root = &rootNode
-
-		// fmt.Println("root:", rootNode)
-		// fmt.Println("=============================")
 	}
 }
 
@@ -179,10 +189,8 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	current.pointer += insert(current.items, item, position)
 
 	if current.pointer < degree {
-		// fmt.Println("leaf", current)
 		return item, nil //
 	}
-	// fmt.Println("leaf splitNode:", current, &current)
 
 	//Split
 	newNode := newNode(degree)
