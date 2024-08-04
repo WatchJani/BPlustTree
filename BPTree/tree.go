@@ -32,7 +32,7 @@ func (n *Node) search(target int) (int, bool) {
 		mid := (low + high) / 2
 
 		if n.items[mid].key == target {
-			return mid, true
+			return mid + 1, true
 		} else if n.items[mid].key < target {
 			low = mid + 1
 		} else {
@@ -80,7 +80,7 @@ func (t *Tree) Find(key int) (int, error) {
 		index, found := next.search(key)
 
 		if found {
-			return next.items[index].value, nil
+			return next.items[index-1].value, nil
 		}
 
 		next = next.children[index]
@@ -105,7 +105,6 @@ func (t *Tree) Insert(key, value int) {
 	}
 
 	current, _ := stack.Pop()
-
 	//update just state state
 	if found {
 		current.node.items[position].value = value
@@ -115,33 +114,38 @@ func (t *Tree) Insert(key, value int) {
 	//insert to leaf and update state
 	if middleKey, nodeChildren := insertLeaf(current.node, position, t.degree, item); nodeChildren != nil {
 		for {
-			temp := current
-			current, err := stack.Pop()
+			temp := current //right leaf
+
+			parent, err := stack.Pop()
 			if err != nil {
 				current = temp
 				break
 			}
 
-			current.node.pointer += insert(current.node.items, middleKey, current.position)
-			chIndex := childrenIndex(middleKey.key, current.node.items[current.position].key, current.position)
-			insert(current.node.children, nodeChildren, chIndex) //insert pointer on children
+			//add to parent new item
+			parent.node.pointer += insert(parent.node.items, middleKey, parent.position)
+			chIndex := childrenIndex(middleKey.key, parent.node.items[parent.position].key, parent.position)
+			//make good link
+			insert(parent.node.children, nodeChildren, chIndex) //insert pointer on children
 
-			if current.node.pointer < t.degree {
+			if parent.node.pointer < t.degree {
 				return
 			}
 
 			middle := t.degree / 2
-			middleKey = current.node.items[middle]
+			middleKey = parent.node.items[middle]
 
 			//split
 			newNode := newNode(t.degree)
-			newNode.pointer += migrate(newNode.items, current.node.items[:middle], 0) //migrate half element to left child node
-			migrate(newNode.children, current.node.children[:middle+1], 0)
+			newNode.pointer += migrate(newNode.items, parent.node.items[:middle], 0) //migrate half element to left child node
+			migrate(newNode.children, parent.node.children[:middle+1], 0)
 
-			current.node.pointer -= deleteElement(current.node.items, 0, current.node.pointer-middle)
-			migrate(current.node.children, current.node.children[middle:], 0)
+			parent.node.pointer -= deleteElement(parent.node.items, 0, parent.node.pointer-middle)
+			migrate(parent.node.children, parent.node.children[middle+1:], 0)
 
 			nodeChildren = &newNode
+
+			current = parent
 		}
 
 		rootNode := newNode(t.degree)
@@ -169,7 +173,7 @@ func migrate[T any](list, migrateElement []T, position int) int {
 	return copy(list[position:], migrateElement)
 }
 
-func deleteElement(list []item, position, deletion int) int {
+func deleteElement[T any](list []T, position, deletion int) int {
 	copy(list[position:], list[position+deletion:])
 	return deletion
 }
