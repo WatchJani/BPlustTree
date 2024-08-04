@@ -116,36 +116,38 @@ func (t *Tree) Insert(key, value int) {
 		for {
 			temp := current //right leaf
 
-			parent, err := stack.Pop()
+			stack, err := stack.Pop() //get parent
 			if err != nil {
 				current = temp
 				break
 			}
 
-			//add to parent new item
-			parent.node.pointer += insert(parent.node.items, middleKey, parent.position)
-			chIndex := childrenIndex(middleKey.key, parent.node.items[parent.position].key, parent.position)
-			//make good link
-			insert(parent.node.children, nodeChildren, chIndex) //insert pointer on children
+			parent := stack.node
 
-			if parent.node.pointer < t.degree {
+			//add to parent new item
+			parent.pointer += insert(parent.items, middleKey, stack.position)
+			chIndex := childrenIndex(middleKey.key, parent.items[stack.position].key, stack.position)
+			//make good link
+			insert(parent.children, nodeChildren, chIndex) //insert pointer on children
+
+			if parent.pointer < t.degree {
 				return
 			}
 
 			middle := t.degree / 2
-			middleKey = parent.node.items[middle]
+			middleKey = parent.items[middle]
 
 			//split
 			newNode := newNode(t.degree)
-			newNode.pointer += migrate(newNode.items, parent.node.items[:middle], 0) //migrate half element to left child node
-			migrate(newNode.children, parent.node.children[:middle+1], 0)
+			newNode.pointer += migrate(newNode.items, parent.items[:middle], 0) //migrate half element to left child node
+			migrate(newNode.children, parent.children[:middle+1], 0)
 
-			parent.node.pointer -= deleteElement(parent.node.items, 0, parent.node.pointer-middle)
-			migrate(parent.node.children, parent.node.children[middle+1:], 0)
+			parent.pointer -= deleteElement(parent.items, 0, parent.pointer-middle)
+			migrate(parent.children, parent.children[middle+1:], 0)
 
 			nodeChildren = &newNode
 
-			current = parent
+			current = stack //fix this part
 		}
 
 		rootNode := newNode(t.degree)
@@ -192,6 +194,7 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	newNode.pointer += migrate(newNode.items, current.items[:middle], 0)
 	current.pointer -= deleteElement(current.items, 0, current.pointer-middle-1)
 
+	//update links between leafs
 	if current.nextNodeL != nil {
 		newNode.nextNodeL = current.nextNodeL  //left connection
 		current.nextNodeL.nextNodeR = &newNode //right connection prevues left node to new node
@@ -219,4 +222,43 @@ func (t *Tree) TestFunc() {
 		fmt.Println("======")
 		current = current.nextNodeR
 	}
+}
+
+func minAllowed(degree, numElement int) bool {
+	return degree/2 >= numElement
+}
+
+func checkTransfer(leaf *Node) *Node {
+	if leaf.nextNodeL != nil && minAllowed(5, leaf.nextNodeL.pointer) {
+		return leaf.nextNodeL
+	} else if leaf.nextNodeR != nil && minAllowed(5, leaf.nextNodeR.pointer) {
+		return leaf.nextNodeR
+	} else {
+		return nil
+	}
+}
+
+func (t *Tree) Delete(key int) error {
+	var (
+		position int
+		found    bool
+		stack    = newStack()
+	)
+
+	for current := t.root; current != nil; {
+		position, found = current.search(key)
+		stack.Push(current, position)
+
+		current = current.children[position]
+	}
+
+	current, _ := stack.Pop()
+	//update just state state
+	if !found {
+		return fmt.Errorf("not found key %d", key)
+	}
+
+	fmt.Println(current)
+
+	return nil
 }

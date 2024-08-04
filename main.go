@@ -29,17 +29,28 @@ func main() {
 
 	myMap := map[int]struct{}{}
 
-	// key := []int{4, 10, 5, 5, 12, 16, 16, 0, 1, 12, 15, 6, 5, 8, 18, 19, 17, 0, 10, 0, 5, 7, 18, 15, 10, 10, 13, 9, 14, 5}
+	key := make([]int, 100)
 
-	for range 1000000 {
+	for index := range 100 {
+		rand := rand.Intn(1000)
+		key[index] = rand
+	}
+
+	for range 1000 {
 		num := rand.Intn(1000000)
-		// fmt.Println(num)
 		tree.Insert(num, 52)
 		myMap[num] = struct{}{}
 	}
 
 	tree.TestFunc()
 	fmt.Println(len(myMap))
+
+	// value, err := tree.Find(key[rand.Intn(99)])
+	// if err != nil {
+	// 	return
+	// }
+
+	// fmt.Println(value)
 }
 
 // func Insert(list []int, insert, position int) int {
