@@ -90,19 +90,8 @@ func (t *Tree) Find(key int) (int, error) {
 }
 
 func (t *Tree) Insert(key, value int) {
-	var (
-		position int
-		found    bool
-		stack    = newStack()
-		item     = item{key: key, value: value}
-	)
-
-	for current := t.root; current != nil; {
-		position, found = current.search(key)
-		stack.Push(current, position)
-
-		current = current.children[position]
-	}
+	stack, item := newStack(), newItem(key, value)
+	position, found := findLeaf(t.root, &stack, key)
 
 	current, _ := stack.Pop()
 	//update just state state
@@ -149,8 +138,6 @@ func (t *Tree) Insert(key, value int) {
 
 			current = stack //fix this part
 		}
-
-		fmt.Println(middleKey)
 
 		rootNode := newNode(t.degree)
 		rootNode.pointer += insert(rootNode.items, middleKey, 0)
@@ -230,41 +217,80 @@ func (t *Tree) TestFunc() {
 
 // check
 func minAllowed(degree, numElement int) bool {
-	return (degree/2)-1 >= numElement
+	return (degree/2)+degree%2-1 <= numElement
 }
 
 // left true, right false
-func checkTransfer(leaf *Node, degree int) (*Node, bool) {
-	if leaf.nextNodeL != nil && minAllowed(degree, leaf.nextNodeL.pointer) {
-		return leaf.nextNodeL, true
-	} else if leaf.nextNodeR != nil && minAllowed(degree, leaf.nextNodeR.pointer) {
-		return leaf.nextNodeR, false
+func checkTransfer(parent positionStr, degree int) (*Node, bool) {
+	//left
+	node, position := parent.node, parent.position
+	if position > 0 && minAllowed(degree, node.children[position-1].pointer-1) {
+		return node.children[position-1], true
+	} else if position < node.pointer && minAllowed(degree, node.children[position+1].pointer-1) {
+		return node.children[position+1], false
 	} else {
 		return nil, false
 	}
 }
 
-func (t *Tree) Delete(key int) error {
-	var (
-		position int
-		found    bool
-		stack    = newStack()
-	)
+// left right transfer
+func transferLeaf(transferNode, currentNode, parent *Node, side bool, position int) {
+	//left
+	transferNode.pointer--
+	fmt.Println(transferNode)
+	if side {
+		parent.pointer += insert(parent.items, transferNode.items[transferNode.pointer], 0) //current leaf with deleted key
+		currentNode.items[position-1] = transferNode.items[transferNode.pointer]            // update parent on position right
 
-	for current := t.root; current != nil; {
+		//check -1 -> [position-1]
+	} else {
+		parent.pointer += insert(parent.items, transferNode.items[0], parent.pointer) //current leaf with deleted key
+		currentNode.items[position-1] = transferNode.items[0]                         // update parent on position right
+	}
+}
+
+func findLeaf(root *Node, stack *Stack, key int) (int, bool) {
+	position, found := 0, false
+
+	for current := root; current != nil; {
 		position, found = current.search(key)
 		stack.Push(current, position)
 
 		current = current.children[position]
 	}
 
-	current, _ := stack.Pop()
-	//update just state state
+	return position, found
+}
+
+func (t *Tree) Delete(key int) error {
+	stack := newStack()
+	position, found := findLeaf(t.root, &stack, key)
+
+	current, _ := stack.Pop() //cant be error because we have always root
+
 	if !found {
 		return fmt.Errorf("not found key %d", key)
 	}
 
-	fmt.Println(current)
+	current.node.pointer -= deleteElement(current.node.items, position, 1)
+
+	if minAllowed(t.degree, current.node.pointer) {
+		return nil
+	}
+	currentLeaf := current.node
+
+	//parent
+	current, err := stack.Pop()
+	if err != nil {
+		return fmt.Errorf(err.Error())
+	}
+
+	transferNode, side := checkTransfer(current, t.degree)
+	if transferNode != nil {
+		fmt.Println(key, side)
+		transferLeaf(transferNode, current.node, currentLeaf, side, current.position)
+		return nil
+	}
 
 	return nil
 }
