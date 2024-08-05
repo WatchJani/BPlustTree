@@ -143,12 +143,14 @@ func (t *Tree) Insert(key, value int) {
 			migrate(newNode.children, parent.children[:middle+1], 0)
 
 			parent.pointer -= deleteElement(parent.items, 0, parent.pointer-middle)
-			migrate(parent.children, parent.children[middle+1:], 0)
+			migrate(parent.children, parent.children[middle+t.degree%2:], 0)
 
 			nodeChildren = &newNode
 
 			current = stack //fix this part
 		}
+
+		fmt.Println(middleKey)
 
 		rootNode := newNode(t.degree)
 		rootNode.pointer += insert(rootNode.items, middleKey, 0)
@@ -192,7 +194,7 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	middle := degree / 2 //Check
 
 	newNode.pointer += migrate(newNode.items, current.items[:middle], 0)
-	current.pointer -= deleteElement(current.items, 0, current.pointer-middle-1)
+	current.pointer -= deleteElement(current.items, 0, current.pointer-middle-degree%2)
 
 	//update links between leafs
 	if current.nextNodeL != nil {
@@ -202,6 +204,8 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 
 	current.nextNodeL = &newNode //left connection
 	newNode.nextNodeR = current  //right connection
+
+	// fmt.Println(current)
 
 	return current.items[0], &newNode
 }
@@ -224,17 +228,19 @@ func (t *Tree) TestFunc() {
 	}
 }
 
+// check
 func minAllowed(degree, numElement int) bool {
-	return degree/2 >= numElement
+	return (degree/2)-1 >= numElement
 }
 
-func checkTransfer(leaf *Node) *Node {
-	if leaf.nextNodeL != nil && minAllowed(5, leaf.nextNodeL.pointer) {
-		return leaf.nextNodeL
-	} else if leaf.nextNodeR != nil && minAllowed(5, leaf.nextNodeR.pointer) {
-		return leaf.nextNodeR
+// left true, right false
+func checkTransfer(leaf *Node, degree int) (*Node, bool) {
+	if leaf.nextNodeL != nil && minAllowed(degree, leaf.nextNodeL.pointer) {
+		return leaf.nextNodeL, true
+	} else if leaf.nextNodeR != nil && minAllowed(degree, leaf.nextNodeR.pointer) {
+		return leaf.nextNodeR, false
 	} else {
-		return nil
+		return nil, false
 	}
 }
 
