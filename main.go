@@ -24,17 +24,23 @@ func main() {
 
 	fmt.Println("==========================================================")
 
-	if err := tree.Delete(29); err != nil {
-		log.Println(err)
-		return
-	}
-
 	if err := tree.Delete(25); err != nil {
 		log.Println(err)
 		return
 	}
 
+	// if err := tree.Delete(0); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+
+	//key not founded, check what is problem
 	if err := tree.Delete(23); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := tree.Delete(21); err != nil {
 		log.Println(err)
 		return
 	}
