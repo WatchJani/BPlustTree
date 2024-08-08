@@ -160,6 +160,11 @@ func insert[T any](list []T, insert T, position int) int {
 	return copy(list[position:], []T{insert})
 }
 
+func insertSet[T any](list []T, insert []T, position int) int {
+	copy(list[position+len(insert):], list[position:])
+	return copy(list[position:], insert)
+}
+
 func migrate[T any](list, migrateElement []T, position int) int {
 	return copy(list[position:], migrateElement)
 }
@@ -291,11 +296,51 @@ func (t *Tree) Delete(key int) error {
 	}
 
 	if transferNode, side := checkTransfer(current.node, current.position, t.degree); transferNode != nil {
-		transferLeaf(transferNode, current.node, temp.node, side, fixPosition(current.node, current.position, key))
+		transferLeaf(transferNode, current.node, temp.node, side, fixPosition(current.node, current.position, key)) //check is necessary fixPosition()
 		return nil
 	}
 
+	mergeLeaf(temp.node, current.node, current.position)
+
+	// for {
+	current.node.pointer -= deleteElement(current.node.items, current.position, 1)
+
+	if minAllowed(t.degree, current.node.pointer) {
+		return nil
+	}
+
+	temp = current //old parent
+
+	// //parent
+	current, err = stack.Pop() //new parent
+	if err != nil {
+		return fmt.Errorf(err.Error())
+	}
+	// }
+
+	// transferNode, side := canIMergeLeaf(current.node, current.position)
+	// fmt.Println(transferNode)
+	// fmt.Println(side)
+
+	transferInternal(current.node, temp.node, current.position, t.degree)
+
 	return nil
+}
+
+// nista ne valja!!! <<<
+func transferInternal(parent, current *Node, position, degree int) {
+	transferNode, side := checkTransfer(parent, position, degree)
+
+	if side {
+		current.items[0] = parent.items[position-1] //nece se stalno na 0 obrisati key, mora se pomjerati sve
+		parent.items[position-1] = transferNode.items[transferNode.pointer-1]
+		transferNode.pointer -= deleteElement(transferNode.items, transferNode.pointer, 1) //!number of element not good
+		current.children[0] = transferNode.children[transferNode.pointer+1]                //children last and second last update
+	} else {
+
+	}
+
+	transferNode.pointer--
 }
 
 // if we find the same key in the internal node then just decries
@@ -305,4 +350,86 @@ func fixPosition(node *Node, position, key int) int {
 	}
 
 	return position
+}
+
+// i cant find right way
+// just need to return sibling
+func canIMergeLeaf(parent *Node, position int) (*Node, bool) {
+	if position > 0 {
+		return parent.children[position-1], true
+	}
+
+	return parent.children[position+1], false
+}
+
+func mergeLeaf(current, parent *Node, position int) {
+	migrateNode, side := canIMergeLeaf(parent, position)
+	//left
+	if side {
+		current.pointer += insertSet(current.items, migrateNode.items[:migrateNode.pointer], 0)
+		if migrateNode.nextNodeL != nil {
+			current.nextNodeL = migrateNode.nextNodeL
+		} else {
+			current.nextNodeL = nil
+		}
+
+		return
+	}
+
+	current.pointer += insertSet(current.items, migrateNode.items[:migrateNode.pointer], current.pointer)
+	if migrateNode.nextNodeR != nil {
+		current.nextNodeR = migrateNode.nextNodeR
+	} else {
+		current.nextNodeR = nil
+	}
+}
+
+// ==================================================================
+func siblingExist(parent *Node, index int) (*Node, bool) {
+	sibling := parent.children[parent.pointer+index]
+	return sibling, sibling != nil
+}
+
+// return sibling, side and [transfer/merge]
+func sibling(parent positionStr, degree int) (*Node, bool, bool) {
+	var (
+		potential *Node
+		side      bool
+	)
+
+	if sibling, isExist := siblingExist(parent.node, -1); isExist {
+		if minAllowed(degree, sibling.pointer) {
+			return sibling, true, false
+		}
+
+		potential, side = sibling, true
+	}
+
+	if sibling, isExist := siblingExist(parent.node, +1); isExist {
+		if minAllowed(degree, sibling.pointer) {
+			return sibling, false, false
+		}
+
+		if potential == nil {
+			potential, side = sibling, false
+		}
+	}
+
+	return potential, side, false
+}
+
+// return position for delete(transferNode), update(parentNode),  insert(currentNode)
+func transferPosition(parent, transfer, current int, side bool) (int, int, int) {
+	if side {
+		return transfer - 1, parent - 1, 0
+	}
+
+	return 0, parent, current
+}
+
+func transfer() {
+	//delete transfer element
+	//update parent
+	//insert current
+	//insert children if exist
 }
