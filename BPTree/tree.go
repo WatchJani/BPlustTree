@@ -86,7 +86,7 @@ func (t *Tree) Find(key int) (int, error) {
 		next = next.children[index]
 	}
 
-	return -1, errors.New("key not found")
+	return -1, fmt.Errorf("key %v not found", key)
 }
 
 func (t *Tree) Insert(key, value int) {
@@ -225,14 +225,13 @@ func (t *Tree) Delete(key int) error {
 	_, found := findLeaf(t.root, &stack, key) //fill stack
 
 	if !found {
-		return fmt.Errorf("key %d is not exist", key)
+		return fmt.Errorf("key %v is not exist", key)
 	}
 
 	current, _ := stack.Pop()
 
 	for {
 		//delete
-		fmt.Println(key, current.node)
 		current.node.pointer -= deleteElement(current.node.items, indexElement(current.position), 1)
 
 		if minAllowed(t.degree, current.node.pointer) {
@@ -241,25 +240,28 @@ func (t *Tree) Delete(key int) error {
 
 		temp := current //current
 
-		current, err := stack.Pop()
+		parent, err := stack.Pop()
 		if err != nil {
 			break
 		}
 
-		sibling, side, operation := sibling(current, t.degree)
+		sibling, side, operation := sibling(parent, t.degree)
+
+		//check how work this 21 key in second iteration
+		 fmt.Println(key, current.node)
 
 		if operation {
-			transfer(current, temp, sibling, found, side)
+			transfer(parent, temp, sibling, found, side)
 			return nil
 		} else {
-			merge(temp.node, sibling, current.node.items[current.position], found, side)
+			merge(temp.node, sibling, parent.node.items[parent.position], found, side)
 		}
 
 		if found {
 			found = !found
 		}
 
-		fmt.Println("]", key, current.node)
+		current = parent
 	}
 
 	if t.root.pointer == 0 && len(t.root.children) > 0 {
