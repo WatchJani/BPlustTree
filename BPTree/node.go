@@ -14,3 +14,11 @@ func newNode(degree int) Node {
 		children: make([]*Node, degree+2),
 	}
 }
+
+func (n *Node) delete() {
+	n.items = nil
+	n.children = nil
+	n.pointer = 0
+	n.nextNodeL = nil
+	n.nextNodeR = nil
+}
