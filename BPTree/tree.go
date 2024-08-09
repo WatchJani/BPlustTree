@@ -160,11 +160,6 @@ func insert[T any](list []T, insert T, position int) int {
 	return copy(list[position:], []T{insert})
 }
 
-// func insertSet[T any](list []T, insert []T, position int) int {
-// 	copy(list[position+len(insert):], list[position:])
-// 	return copy(list[position:], insert)
-// }
-
 func migrate[T any](list, migrateElement []T, position int) int {
 	return copy(list[position:], migrateElement)
 }
@@ -233,22 +228,17 @@ func (t *Tree) Delete(key int) error {
 	for {
 		//delete
 		current.node.pointer -= deleteElement(current.node.items, indexElement(current.position), 1)
-
 		if minAllowed(t.degree, current.node.pointer) {
 			return nil
 		}
 
 		temp := current //current
-
 		parent, err := stack.Pop()
 		if err != nil {
 			break
 		}
 
 		sibling, side, operation := sibling(parent, t.degree)
-
-		//check how work this 21 key in second iteration
-		 fmt.Println(key, current.node)
 
 		if operation {
 			transfer(parent, temp, sibling, found, side)
@@ -273,7 +263,6 @@ func (t *Tree) Delete(key int) error {
 	return nil
 }
 
-// ==================================================================
 func siblingExist(parent positionStr, index int) (*Node, bool) {
 	index = parent.position + index
 
@@ -330,6 +319,7 @@ func indexElement(index int) int {
 }
 
 func merge(current, sibling *Node, parentElement item, leafInternal, side bool) {
+
 	position := sideFn(side, current.pointer)
 
 	if leafInternal {
@@ -347,9 +337,14 @@ func merge(current, sibling *Node, parentElement item, leafInternal, side bool) 
 		current.pointer += insert(current.items, parentElement, position)
 	}
 
-	current.pointer += migrate(current.items, sibling.items[:sibling.pointer], position)
+	current.pointer += insertSet(current.items, sibling.items[:sibling.pointer], position)
 
 	sibling.delete()
+}
+
+func insertSet[T any](list []T, insert []T, position int) int {
+	copy(list[position+len(insert):], list[position:])
+	return copy(list[position:], insert)
 }
 
 func transfer(parent, current positionStr, sibling *Node, leafInternal, side bool) {

@@ -39,27 +39,33 @@ func main() {
 		return
 	}
 
-	//
+	// //
 	if err := tree.Delete(21); err != nil {
 		log.Println(err)
 		return
 	}
 
-	// if err := tree.Delete(0); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
+	// //easy delete
+	if err := tree.Delete(0); err != nil {
+		log.Println(err)
+		return
+	}
 
-	//key not founded, check what is problem
-	// if err := tree.Delete(23); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
+	if err := tree.Delete(4); err != nil {
+		log.Println(err)
+		return
+	}
 
-	// if err := tree.Delete(21); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
+	if err := tree.Delete(7); err != nil {
+		log.Println(err)
+		return
+	}
+
+	//new bug
+	if err := tree.Delete(10); err != nil {
+		log.Println(err)
+		return
+	}
 
 	tree.TestFunc()
 
