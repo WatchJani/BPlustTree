@@ -202,58 +202,9 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	return current.items[0], &newNode
 }
 
-func (t *Tree) TestFunc() {
-	current := t.root
-	for current.children[0] != nil {
-		current = current.children[0]
-	}
-
-	var counter int
-
-	for current != nil {
-		for _, value := range current.items[:current.pointer] {
-			counter++
-			fmt.Println(counter, value)
-		}
-		fmt.Println("======")
-		current = current.nextNodeR
-	}
-}
-
 // check //work fine
 func minAllowed(degree, numElement int) bool {
 	return (degree/2)+degree%2-1 <= numElement
-}
-
-// left true, right false //work fine
-func checkTransfer(parent *Node, position, degree int) (*Node, bool) {
-	if position > 0 && minAllowed(degree, parent.children[position-1].pointer-1) {
-		return parent.children[position-1], true
-	} else if position <= parent.pointer && minAllowed(degree, parent.children[position+1].pointer-1) {
-		return parent.children[position+1], false
-	} else {
-		return nil, false
-	}
-}
-
-// left right transfer
-func transferLeaf(transferNode, parent, current *Node, side bool, position int) {
-	//left
-	transferNode.pointer-- //mask the last element
-
-	if position > 0 {
-		position--
-	}
-
-	if side {
-		current.pointer += insert(current.items, transferNode.items[transferNode.pointer], 0) //current leaf with deleted key
-		parent.items[position] = transferNode.items[transferNode.pointer]                     // update parent on position right
-
-	} else {
-		current.pointer += insert(current.items, transferNode.items[0], current.pointer) //current leaf with deleted key
-		deleteElement(transferNode.items, 0, 1)                                          //real delete element
-		parent.items[position+1] = transferNode.items[0]
-	}
 }
 
 func findLeaf(root *Node, stack *Stack, key int) (int, bool) {
@@ -270,118 +221,10 @@ func findLeaf(root *Node, stack *Stack, key int) (int, bool) {
 }
 
 func (t *Tree) Delete(key int) error {
-	stack := newStack()                       //create stack
-	_, found := findLeaf(t.root, &stack, key) //fill stack
-
-	current, _ := stack.Pop()
-
-	//Check if key exist
-	if !found {
-		return fmt.Errorf("not found key %d", key)
-	}
-
-	//delete key //fixPosition -> current.position-1
-	current.node.pointer -= deleteElement(current.node.items, current.position-1, 1)
-
-	if minAllowed(t.degree, current.node.pointer) {
-		return nil
-	}
-
-	temp := current //leaf node
-
-	//parent
-	current, err := stack.Pop()
-	if err != nil {
-		return fmt.Errorf(err.Error())
-	}
-
-	if transferNode, side := checkTransfer(current.node, current.position, t.degree); transferNode != nil {
-		transferLeaf(transferNode, current.node, temp.node, side, fixPosition(current.node, current.position, key)) //check is necessary fixPosition()
-		return nil
-	}
-
-	mergeLeaf(temp.node, current.node, current.position)
-
-	// for {
-	current.node.pointer -= deleteElement(current.node.items, current.position, 1)
-
-	if minAllowed(t.degree, current.node.pointer) {
-		return nil
-	}
-
-	temp = current //old parent
-
-	// //parent
-	current, err = stack.Pop() //new parent
-	if err != nil {
-		return fmt.Errorf(err.Error())
-	}
-	// }
-
-	// transferNode, side := canIMergeLeaf(current.node, current.position)
-	// fmt.Println(transferNode)
-	// fmt.Println(side)
-
-	transferInternal(current.node, temp.node, current.position, t.degree)
+	// stack := newStack()                       //create stack
+	// _, found := findLeaf(t.root, &stack, key) //fill stack
 
 	return nil
-}
-
-// nista ne valja!!! <<<
-func transferInternal(parent, current *Node, position, degree int) {
-	transferNode, side := checkTransfer(parent, position, degree)
-
-	if side {
-		current.items[0] = parent.items[position-1] //nece se stalno na 0 obrisati key, mora se pomjerati sve
-		parent.items[position-1] = transferNode.items[transferNode.pointer-1]
-		transferNode.pointer -= deleteElement(transferNode.items, transferNode.pointer, 1) //!number of element not good
-		current.children[0] = transferNode.children[transferNode.pointer+1]                //children last and second last update
-	} else {
-
-	}
-
-	transferNode.pointer--
-}
-
-// if we find the same key in the internal node then just decries
-func fixPosition(node *Node, position, key int) int {
-	if node.items[position-1].key == key {
-		return position - 1
-	}
-
-	return position
-}
-
-// i cant find right way
-// just need to return sibling
-func canIMergeLeaf(parent *Node, position int) (*Node, bool) {
-	if position > 0 {
-		return parent.children[position-1], true
-	}
-
-	return parent.children[position+1], false
-}
-
-func mergeLeaf(current, parent *Node, position int) {
-	migrateNode, side := canIMergeLeaf(parent, position)
-	//left
-	if side {
-		current.pointer += insertSet(current.items, migrateNode.items[:migrateNode.pointer], 0)
-		if migrateNode.nextNodeL != nil {
-			current.nextNodeL = migrateNode.nextNodeL
-		} else {
-			current.nextNodeL = nil
-		}
-
-		return
-	}
-
-	current.pointer += insertSet(current.items, migrateNode.items[:migrateNode.pointer], current.pointer)
-	if migrateNode.nextNodeR != nil {
-		current.nextNodeR = migrateNode.nextNodeR
-	} else {
-		current.nextNodeR = nil
-	}
 }
 
 // ==================================================================
@@ -418,18 +261,140 @@ func sibling(parent positionStr, degree int) (*Node, bool, bool) {
 	return potential, side, false
 }
 
-// return position for delete(transferNode), update(parentNode),  insert(currentNode)
-func transferPosition(parent, transfer, current int, side bool) (int, int, int) {
+func sideFn(side bool, pointer int) int {
 	if side {
-		return transfer - 1, parent - 1, 0
+		return 0
 	}
 
-	return 0, parent, current
+	return pointer
 }
 
-func transfer() {
-	//delete transfer element
-	//update parent
-	//insert current
-	//insert children if exist
+func indexElement(index int) int {
+	if index > 0 {
+		return index - 1
+	}
+
+	return index
+}
+
+func merge(currentNode, mergeNode *Node, parentElement item, leafInternal, side bool) {
+	position := sideFn(side, currentNode.pointer)
+
+	if leafInternal {
+		if currentNode.nextNodeL == mergeNode {
+			currentNode.nextNodeL = mergeNode.nextNodeL
+			mergeNode.nextNodeL.nextNodeR = currentNode
+		} else {
+			currentNode.nextNodeR = mergeNode.nextNodeR
+			mergeNode.nextNodeR.nextNodeL = currentNode
+		}
+	} else {
+		//update children
+		migrate(currentNode.children, mergeNode.children[:mergeNode.pointer], position+1)
+		//insert parent node
+		currentNode.pointer += insert(currentNode.items, parentElement, position)
+	}
+
+	currentNode.pointer += migrate(currentNode.items, mergeNode.items[:mergeNode.pointer], position)
+	mergeNode = nil
+}
+
+// side true left sibling
+func transfer(parent, current, sibling positionStr, leafInternal, side bool) {
+	itemIndex := 0
+	parentPosition := parent.position - 1
+	childInsertPosition := current.node.pointer
+	insertPosition := current.node.pointer
+
+	if side {
+		itemIndex = sibling.node.pointer - 1
+		childInsertPosition = 0
+		insertPosition = 0
+	} else {
+		parentPosition++
+	}
+
+	if leafInternal {
+		siblingItem := sibling.node.items[itemIndex]
+		if !side {
+			siblingItem = sibling.node.items[1]
+		}
+		parent.node.items[parentPosition] = siblingItem
+		current.node.pointer += insert(current.node.items, sibling.node.items[itemIndex], insertPosition)
+	} else {
+		current.node.pointer += insert(current.node.items, parent.node.items[parentPosition], childInsertPosition)
+		parent.node.items[parentPosition] = sibling.node.items[itemIndex]
+		insert(current.node.children, sibling.node.children[itemIndex], childInsertPosition)
+		if !side {
+			deleteElement(sibling.node.children, 0, 1)
+		}
+	}
+
+	sibling.node.pointer -= deleteElement(sibling.node.items, itemIndex, 1)
+	// if leafInternal { //leaf
+	// 	itemIndex := 0
+	// 	if side {
+	// 		itemIndex = sibling.position - 1
+	// 		parent.node.items[parent.position-1] = sibling.node.items[itemIndex]
+	// 		current.node.pointer += insert(current.node.items, sibling.node.items[itemIndex], 0)
+	// 	} else {
+	// 		current.node.pointer += insert(current.node.items, sibling.node.items[0], current.node.pointer)
+	// 		parent.node.items[parent.position-1] = sibling.node.items[1]
+	// 	}
+	// 	sibling.node.pointer -= deleteElement(sibling.node.items, itemIndex, 1)
+	// } else {
+	// 	parentPosition := parent.position - 1
+	// 	itemIndex := 0
+	// 	childInsertPosition := current.node.pointer
+
+	// 	if side {
+	// 		itemIndex = sibling.node.pointer - 1
+	// 		childInsertPosition = 0
+	// 	} else {
+	// 		parentPosition++
+	// 	}
+
+	// 	current.node.pointer += insert(current.node.items, parent.node.items[parentPosition], childInsertPosition)
+	// 	parent.node.items[parentPosition] = sibling.node.items[itemIndex]
+	// 	sibling.node.pointer -= deleteElement(sibling.node.items, itemIndex, 1)
+
+	// 	insert(current.node.children, sibling.node.children[itemIndex], childInsertPosition)
+
+	// 	if !side {
+	// 		deleteElement(sibling.node.children, 0, 1)
+	// 	}
+
+	// if side {
+	// 	parentPosition := parent.position - 1
+	// 	current.node.pointer += insert(current.node.items, parent.node.items[parentPosition], 0)
+	// 	parent.node.items[parentPosition] = sibling.node.items[sibling.node.pointer-1]
+	// 	sibling.node.pointer -= deleteElement(sibling.node.items, sibling.node.pointer-1, 1)
+	// 	insert(current.node.children, sibling.node.children[sibling.node.pointer], 0)
+	// } else {
+	// 	parentPosition := parent.position
+	// 	current.node.pointer += insert(current.node.items, parent.node.items[parentPosition], current.node.pointer)
+	// 	parent.node.items[parentPosition] = sibling.node.items[0]
+	// 	sibling.node.pointer -= deleteElement(sibling.node.items, 0, 1)
+	// 	insert(current.node.children, sibling.node.children[0], current.node.pointer)
+	// 	deleteElement(sibling.node.children, 0, 1)
+	// }
+	// }
+}
+
+func (t *Tree) TestFunc() {
+	current := t.root
+	for current.children[0] != nil {
+		current = current.children[0]
+	}
+
+	var counter int
+
+	for current != nil {
+		for _, value := range current.items[:current.pointer] {
+			counter++
+			fmt.Println(counter, value)
+		}
+		fmt.Println("======")
+		current = current.nextNodeR
+	}
 }
