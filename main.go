@@ -100,7 +100,42 @@ func main() {
 		return
 	}
 
+	if err := tree.Delete(22); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := tree.Delete(20); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := tree.Delete(24); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := tree.Delete(28); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := tree.Delete(8); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := tree.Delete(23); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := tree.Delete(9); err != nil {
+		log.Println(err)
+		return
+	}
+
 	tree.TestFunc()
 	root := tree.GetRoot()
-	fmt.Println(root.Children[2])
+	fmt.Println(root)
 }

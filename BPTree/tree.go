@@ -232,8 +232,8 @@ func (t *Tree) Delete(key int) error {
 		// if !found {
 		// 	deleteElement(current.node.Children, current.position, 1)
 		// }
-
-		if minAllowed(t.degree, current.node.pointer) {
+		// fmt.Println(current.node)
+		if minAllowed(t.degree, current.node.pointer) || (found && t.root.pointer == 0) {
 			return nil
 		}
 
