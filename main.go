@@ -90,7 +90,17 @@ func main() {
 		return
 	}
 
+	if err := tree.Delete(5); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := tree.Delete(13); err != nil {
+		log.Println(err)
+		return
+	}
+
 	tree.TestFunc()
 	root := tree.GetRoot()
-	fmt.Println(root.Children[3])
+	fmt.Println(root.Children[2])
 }

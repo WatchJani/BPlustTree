@@ -249,7 +249,7 @@ func (t *Tree) Delete(key int) error {
 			transfer(parent, temp, sibling, found, side)
 			return nil
 		} else {
-			merge(temp.node, sibling, parent, found, side)
+			merge(temp.node, sibling, parent, found, side, key)
 		}
 
 		if found {
@@ -327,19 +327,26 @@ func indexElement(index int) int {
 	return index
 }
 
-func merge(current, sibling *Node, parent positionStr, leafInternal, side bool) {
+func merge(current, sibling *Node, parent positionStr, leafInternal, side bool, key int) {
 	parentElement := parent.node.items[parent.position]
 	position := sideFn(side, current.pointer)
 
 	if leafInternal {
+
 		if current.nextNodeL == sibling {
 			current.nextNodeL = sibling.nextNodeL
-			sibling.nextNodeL.nextNodeR = current
+			if sibling.nextNodeL != nil {
+				sibling.nextNodeL.nextNodeR = current
+			}
 		} else {
 			current.nextNodeR = sibling.nextNodeR
-			sibling.nextNodeR.nextNodeL = current
+			if sibling.nextNodeR != nil {
+				sibling.nextNodeR.nextNodeL = current
+			}
 		}
+
 	} else {
+
 		//update children
 		migrate(current.Children, sibling.Children[:sibling.pointer], position+1)
 		//insert parent node
