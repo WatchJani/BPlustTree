@@ -11,111 +11,21 @@ func main() {
 
 	myMap := map[int]struct{}{}
 
-	key := []int{12, 26, 10, 21, 24, 12, 13, 22, 29, 27, 25, 9, 20, 5, 6, 8, 23, 26, 10, 7, 1, 28, 28, 10, 4, 23, 0, 20, 26, 23}
-	//12, 26, 10, 21, 24, 13, 22, 29, 27, 25, 9, 20, 5, 6, 8, 23, 7, 1, 28, 4, 0
-	fmt.Println(len(key))
+	//1. index error
+	//2. infinite loop
+
+	key := []int{1, 8, 8, 20, 18, 23, 8, 28, 20, 10, 19, 10, 5, 16, 6, 23, 4, 11, 3, 17, 8, 14, 16, 21, 12, 29, 1, 25, 17, 3}
+
+	//1, 8, 20, 18, 23, 28, 10, 19, 5, 16, 6, 4, 11, 3, 17, 14, 21, 12, 29, 25
 
 	for _, num := range key {
 		tree.Insert(num, 52)
 		myMap[num] = struct{}{}
 	}
 
-	// tree.TestFunc()
-	// fmt.Println(len(myMap))
-
 	fmt.Println("==========================================================")
 
-	if err := tree.Delete(26); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(29); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(25); err != nil {
-		log.Println(err)
-		return
-	}
-
-	// // // // //
-	if err := tree.Delete(21); err != nil {
-		log.Println(err)
-		return
-	}
-
-	// // // //easy delete
-	if err := tree.Delete(0); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(4); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(7); err != nil {
-		log.Println(err)
-		return
-	}
-
-	//===================================================================
-
-	if err := tree.Delete(27); err != nil {
-		log.Println(err)
-		return
-	}
-
-	//new bug
-	if err := tree.Delete(10); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(12); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(6); err != nil {
-		log.Println(err)
-		return
-	}
-
 	if err := tree.Delete(1); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(5); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(13); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(22); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(20); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(24); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(28); err != nil {
 		log.Println(err)
 		return
 	}
@@ -125,17 +35,32 @@ func main() {
 		return
 	}
 
-	if err := tree.Delete(23); err != nil {
+	if err := tree.Delete(20); err != nil {
 		log.Println(err)
 		return
 	}
 
-	if err := tree.Delete(9); err != nil {
-		log.Println(err)
-		return
-	}
+	// if err := tree.Delete(18); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+
+	// if err := tree.Delete(23); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+
+	// if err := tree.Delete(28); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+
+	// if err := tree.Delete(10); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
 
 	tree.TestFunc()
 	root := tree.GetRoot()
-	fmt.Println(root)
+	fmt.Println(root.Children[1].Children[3])
 }

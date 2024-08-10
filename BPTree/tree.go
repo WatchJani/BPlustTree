@@ -8,7 +8,6 @@ import (
 type Tree struct {
 	root   *Node
 	degree int
-	//length int
 }
 
 func New(degree int) *Tree {
@@ -192,8 +191,6 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	current.nextNodeL = &newNode //left connection
 	newNode.nextNodeR = current  //right connection
 
-	// fmt.Println(current)
-
 	return current.items[0], &newNode
 }
 
@@ -225,14 +222,9 @@ func (t *Tree) Delete(key int) error {
 
 	current, _ := stack.Pop()
 
-	// fmt.Println(key, "super", current.node)
 	for {
-		//delete
 		current.node.pointer -= deleteElement(current.node.items, indexElement(current.position), 1)
-		// if !found {
-		// 	deleteElement(current.node.Children, current.position, 1)
-		// }
-		// fmt.Println(current.node)
+
 		if minAllowed(t.degree, current.node.pointer) || (found && t.root.pointer == 0) {
 			return nil
 		}
@@ -246,10 +238,11 @@ func (t *Tree) Delete(key int) error {
 		sibling, side, operation := sibling(parent, t.degree)
 
 		if operation {
+
 			transfer(parent, temp, sibling, found, side)
 			return nil
 		} else {
-			merge(temp.node, sibling, parent, found, side, key)
+			merge(temp.node, sibling, parent, found, side)
 		}
 
 		if found {
@@ -327,12 +320,11 @@ func indexElement(index int) int {
 	return index
 }
 
-func merge(current, sibling *Node, parent positionStr, leafInternal, side bool, key int) {
+func merge(current, sibling *Node, parent positionStr, leafInternal, side bool) {
 	parentElement := parent.node.items[parent.position]
 	position := sideFn(side, current.pointer)
 
 	if leafInternal {
-
 		if current.nextNodeL == sibling {
 			current.nextNodeL = sibling.nextNodeL
 			if sibling.nextNodeL != nil {
@@ -378,6 +370,8 @@ func transfer(parent, current positionStr, sibling *Node, leafInternal, side boo
 	childInsertPosition := current.node.pointer
 	insertPosition := current.node.pointer
 
+	// fmt.Println(key)
+
 	if side {
 		itemIndex = sibling.pointer - 1
 		childInsertPosition = 0
@@ -396,10 +390,13 @@ func transfer(parent, current positionStr, sibling *Node, leafInternal, side boo
 	} else {
 		current.node.pointer += insert(current.node.items, parent.node.items[parentPosition], childInsertPosition)
 		parent.node.items[parentPosition] = sibling.items[itemIndex]
-		// deleteElement(current.node.Children, current.position+1, 1)                       //Correct
-		insert(current.node.Children, sibling.Children[itemIndex+1], childInsertPosition) //check right side -> itemIndex+1(work for left) -> itemIndex
+
 		if !side {
+			insert(current.node.Children, sibling.Children[0], current.node.pointer) //check right side -> itemIndex+1(work for left) -> itemIndex
 			deleteElement(sibling.Children, 0, 1)
+		} else {
+			// deleteElement(current.node.Children, current.position+1, 1)
+			insert(current.node.Children, sibling.Children[itemIndex+1], childInsertPosition) //check right side -> itemIndex+1(work for left) -> itemIndex
 		}
 	}
 
