@@ -19,8 +19,8 @@ func main() {
 		myMap[num] = struct{}{}
 	}
 
-	tree.TestFunc()
-	fmt.Println(len(myMap))
+	// tree.TestFunc()
+	// fmt.Println(len(myMap))
 
 	fmt.Println("==========================================================")
 
@@ -39,13 +39,13 @@ func main() {
 		return
 	}
 
-	// //
+	// // // //
 	if err := tree.Delete(21); err != nil {
 		log.Println(err)
 		return
 	}
 
-	// //easy delete
+	// // //easy delete
 	if err := tree.Delete(0); err != nil {
 		log.Println(err)
 		return
@@ -61,6 +61,13 @@ func main() {
 		return
 	}
 
+	root := tree.GetRoot()
+
+	if err := tree.Delete(27); err != nil {
+		log.Println(err)
+		return
+	}
+
 	//new bug
 	if err := tree.Delete(10); err != nil {
 		log.Println(err)
@@ -68,5 +75,5 @@ func main() {
 	}
 
 	tree.TestFunc()
-
+	fmt.Println(root.Children[0].Children[3])
 }

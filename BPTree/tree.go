@@ -20,7 +20,7 @@ func New(degree int) *Tree {
 		degree: degree,
 		root: &Node{
 			items:    make([]item, degree+1),
-			children: make([]*Node, degree+2),
+			Children: make([]*Node, degree+2),
 		},
 	}
 }
@@ -83,7 +83,7 @@ func (t *Tree) Find(key int) (int, error) {
 			return next.items[index-1].value, nil
 		}
 
-		next = next.children[index]
+		next = next.Children[index]
 	}
 
 	return -1, fmt.Errorf("key %v not found", key)
@@ -117,7 +117,7 @@ func (t *Tree) Insert(key, value int) {
 			parent.pointer += insert(parent.items, middleKey, stack.position)
 			chIndex := childrenIndex(middleKey.key, parent.items[stack.position].key, stack.position)
 			//make good link
-			insert(parent.children, nodeChildren, chIndex) //insert pointer on children
+			insert(parent.Children, nodeChildren, chIndex) //insert pointer on children
 
 			if parent.pointer < t.degree {
 				return
@@ -129,10 +129,10 @@ func (t *Tree) Insert(key, value int) {
 			//split
 			newNode := newNode(t.degree)
 			newNode.pointer += migrate(newNode.items, parent.items[:middle], 0) //migrate half element to left child node
-			migrate(newNode.children, parent.children[:middle+1], 0)
+			migrate(newNode.Children, parent.Children[:middle+1], 0)
 
 			parent.pointer -= deleteElement(parent.items, 0, parent.pointer-middle)
-			migrate(parent.children, parent.children[middle+t.degree%2:], 0)
+			migrate(parent.Children, parent.Children[middle+t.degree%2:], 0)
 
 			nodeChildren = &newNode
 
@@ -141,8 +141,8 @@ func (t *Tree) Insert(key, value int) {
 
 		rootNode := newNode(t.degree)
 		rootNode.pointer += insert(rootNode.items, middleKey, 0)
-		rootNode.children[0] = nodeChildren
-		rootNode.children[1] = current.node
+		rootNode.Children[0] = nodeChildren
+		rootNode.Children[1] = current.node
 		t.root = &rootNode
 	}
 }
@@ -209,7 +209,7 @@ func findLeaf(root *Node, stack *Stack, key int) (int, bool) {
 		position, found = current.search(key)
 		stack.Push(current, position)
 
-		current = current.children[position]
+		current = current.Children[position]
 	}
 
 	return position, found
@@ -225,9 +225,14 @@ func (t *Tree) Delete(key int) error {
 
 	current, _ := stack.Pop()
 
+	// fmt.Println(key, "super", current.node)
 	for {
 		//delete
 		current.node.pointer -= deleteElement(current.node.items, indexElement(current.position), 1)
+		// if !found {
+		// 	deleteElement(current.node.Children, current.position, 1)
+		// }
+
 		if minAllowed(t.degree, current.node.pointer) {
 			return nil
 		}
@@ -244,7 +249,7 @@ func (t *Tree) Delete(key int) error {
 			transfer(parent, temp, sibling, found, side)
 			return nil
 		} else {
-			merge(temp.node, sibling, parent.node.items[parent.position], found, side)
+			merge(temp.node, sibling, parent, found, side)
 		}
 
 		if found {
@@ -254,9 +259,13 @@ func (t *Tree) Delete(key int) error {
 		current = parent
 	}
 
-	if t.root.pointer == 0 && len(t.root.children) > 0 {
+	if t.root.pointer == 0 && len(t.root.Children) > 0 {
 		// If the root is empty, promote the first child as the new root
-		t.root = t.root.children[0] //ne mora znaciti moze biti i 1
+		if t.root.Children[0] != nil {
+			t.root = t.root.Children[0]
+		} else {
+			t.root = t.root.Children[1]
+		}
 	}
 
 	//update root
@@ -270,7 +279,7 @@ func siblingExist(parent positionStr, index int) (*Node, bool) {
 		return nil, false
 	}
 
-	sibling := parent.node.children[index]
+	sibling := parent.node.Children[index]
 	return sibling, true
 }
 
@@ -318,8 +327,8 @@ func indexElement(index int) int {
 	return index
 }
 
-func merge(current, sibling *Node, parentElement item, leafInternal, side bool) {
-
+func merge(current, sibling *Node, parent positionStr, leafInternal, side bool) {
+	parentElement := parent.node.items[parent.position]
 	position := sideFn(side, current.pointer)
 
 	if leafInternal {
@@ -332,9 +341,16 @@ func merge(current, sibling *Node, parentElement item, leafInternal, side bool) 
 		}
 	} else {
 		//update children
-		migrate(current.children, sibling.children[:sibling.pointer], position+1)
+		migrate(current.Children, sibling.Children[:sibling.pointer], position+1)
 		//insert parent node
 		current.pointer += insert(current.items, parentElement, position)
+		position++
+		migrate(current.Children, sibling.Children[:sibling.pointer+1], position)
+	}
+
+	//add parent children delete
+	if side { //left side sibling delete
+		deleteElement(parent.node.Children, parent.position-1, 1)
 	}
 
 	current.pointer += insertSet(current.items, sibling.items[:sibling.pointer], position)
@@ -371,19 +387,21 @@ func transfer(parent, current positionStr, sibling *Node, leafInternal, side boo
 	} else {
 		current.node.pointer += insert(current.node.items, parent.node.items[parentPosition], childInsertPosition)
 		parent.node.items[parentPosition] = sibling.items[itemIndex]
-		insert(current.node.children, sibling.children[itemIndex], childInsertPosition)
+		deleteElement(current.node.Children, current.position+1, 1)                       //Correct
+		insert(current.node.Children, sibling.Children[itemIndex+1], childInsertPosition) //check right side -> itemIndex+1(work for left) -> itemIndex
 		if !side {
-			deleteElement(sibling.children, 0, 1)
+			deleteElement(sibling.Children, 0, 1)
 		}
 	}
 
+	//delete sibling element
 	sibling.pointer -= deleteElement(sibling.items, itemIndex, 1)
 }
 
 func (t *Tree) TestFunc() {
 	current := t.root
-	for current.children[0] != nil {
-		current = current.children[0]
+	for current.Children[0] != nil {
+		current = current.Children[0]
 	}
 
 	var counter int
@@ -396,4 +414,8 @@ func (t *Tree) TestFunc() {
 		fmt.Println("======")
 		current = current.nextNodeR
 	}
+}
+
+func (t *Tree) GetRoot() *Node {
+	return t.root
 }
