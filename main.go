@@ -25,42 +25,14 @@ func main() {
 
 	fmt.Println("==========================================================")
 
-	if err := tree.Delete(1); err != nil {
-		log.Println(err)
-		return
+	for _, key := range key {
+		if err := tree.Delete(key); err != nil {
+			log.Println(err)
+			continue
+		}
 	}
-
-	if err := tree.Delete(8); err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := tree.Delete(20); err != nil {
-		log.Println(err)
-		return
-	}
-
-	// if err := tree.Delete(18); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-
-	// if err := tree.Delete(23); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-
-	// if err := tree.Delete(28); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-
-	// if err := tree.Delete(10); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
 
 	tree.TestFunc()
-	root := tree.GetRoot()
-	fmt.Println(root.Children[1].Children[3])
+	// root := tree.GetRoot()
+	// fmt.Println(root.Children[1])
 }
