@@ -351,6 +351,8 @@ func merge(current, sibling *Node, parent positionStr, leafInternal, side bool) 
 	//add parent children delete
 	if side { //left side sibling delete
 		deleteElement(parent.node.Children, parent.position-1, 1)
+	} else {
+		deleteElement(parent.node.Children, parent.position+1, 1)
 	}
 
 	current.pointer += insertSet(current.items, sibling.items[:sibling.pointer], position)
@@ -387,7 +389,7 @@ func transfer(parent, current positionStr, sibling *Node, leafInternal, side boo
 	} else {
 		current.node.pointer += insert(current.node.items, parent.node.items[parentPosition], childInsertPosition)
 		parent.node.items[parentPosition] = sibling.items[itemIndex]
-		deleteElement(current.node.Children, current.position+1, 1)                       //Correct
+		// deleteElement(current.node.Children, current.position+1, 1)                       //Correct
 		insert(current.node.Children, sibling.Children[itemIndex+1], childInsertPosition) //check right side -> itemIndex+1(work for left) -> itemIndex
 		if !side {
 			deleteElement(sibling.Children, 0, 1)

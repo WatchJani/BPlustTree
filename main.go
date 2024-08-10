@@ -12,6 +12,7 @@ func main() {
 	myMap := map[int]struct{}{}
 
 	key := []int{12, 26, 10, 21, 24, 12, 13, 22, 29, 27, 25, 9, 20, 5, 6, 8, 23, 26, 10, 7, 1, 28, 28, 10, 4, 23, 0, 20, 26, 23}
+	//12, 26, 10, 21, 24, 13, 22, 29, 27, 25, 9, 20, 5, 6, 8, 23, 7, 1, 28, 4, 0
 	fmt.Println(len(key))
 
 	for _, num := range key {
@@ -39,13 +40,13 @@ func main() {
 		return
 	}
 
-	// // // //
+	// // // // //
 	if err := tree.Delete(21); err != nil {
 		log.Println(err)
 		return
 	}
 
-	// // //easy delete
+	// // // //easy delete
 	if err := tree.Delete(0); err != nil {
 		log.Println(err)
 		return
@@ -61,7 +62,7 @@ func main() {
 		return
 	}
 
-	root := tree.GetRoot()
+	//===================================================================
 
 	if err := tree.Delete(27); err != nil {
 		log.Println(err)
@@ -74,6 +75,22 @@ func main() {
 		return
 	}
 
+	if err := tree.Delete(12); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := tree.Delete(6); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := tree.Delete(1); err != nil {
+		log.Println(err)
+		return
+	}
+
 	tree.TestFunc()
-	fmt.Println(root.Children[0].Children[3])
+	root := tree.GetRoot()
+	fmt.Println(root.Children[3])
 }
