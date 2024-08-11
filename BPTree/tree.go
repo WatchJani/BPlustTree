@@ -238,7 +238,6 @@ func (t *Tree) Delete(key int) error {
 		sibling, side, operation := sibling(parent, t.degree)
 
 		if operation {
-
 			transfer(parent, temp, sibling, found, side)
 			return nil
 		} else {
@@ -321,7 +320,7 @@ func indexElement(index int) int {
 }
 
 func merge(current, sibling *Node, parent positionStr, leafInternal, side bool) {
-	parentElement := parent.node.items[parent.position]
+	parentElement := parent.node.items[indexElement(parent.position)]
 	position := sideFn(side, current.pointer)
 
 	if leafInternal {
@@ -336,18 +335,18 @@ func merge(current, sibling *Node, parent positionStr, leafInternal, side bool) 
 				sibling.nextNodeR.nextNodeL = current
 			}
 		}
-
 	} else {
-
-		//update children
-		migrate(current.Children, sibling.Children[:sibling.pointer], position+1)
-		//insert parent node
+		//add parent element from
 		current.pointer += insert(current.items, parentElement, position)
-		position++
-		migrate(current.Children, sibling.Children[:sibling.pointer+1], position)
+
+		if !side {
+			position++
+		}
+		
+		insertSet(current.Children, sibling.Children[:sibling.pointer+1], position)
 	}
 
-	//add parent children delete
+	//delete parent element
 	if side { //left side sibling delete
 		deleteElement(parent.node.Children, parent.position-1, 1)
 	} else {
