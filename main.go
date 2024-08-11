@@ -8,11 +8,11 @@ import (
 )
 
 func main() {
-	tree := BPTree.New(5)
+
+	//need to fix delete with 4
+	tree := BPTree.New(99)
 
 	myMap := map[int]struct{}{}
-
-	//2. infinite loop
 
 	key := make([]int, 30)
 

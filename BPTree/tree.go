@@ -5,6 +5,41 @@ import (
 	"fmt"
 )
 
+type item struct {
+	key   int
+	value int
+}
+
+func newItem(key, value int) item {
+	return item{
+		key:   key,
+		value: value,
+	}
+}
+
+type Node struct {
+	items     []item
+	Children  []*Node
+	nextNodeL *Node
+	nextNodeR *Node
+	pointer   int
+}
+
+func newNode(degree int) Node {
+	return Node{
+		items:    make([]item, degree+1),
+		Children: make([]*Node, degree+2),
+	}
+}
+
+func (n *Node) delete() {
+	n.items = nil
+	n.Children = nil
+	n.pointer = 0
+	n.nextNodeL = nil
+	n.nextNodeR = nil
+}
+
 type Tree struct {
 	root   *Node
 	degree int
@@ -342,7 +377,7 @@ func merge(current, sibling *Node, parent positionStr, leafInternal, side bool) 
 		if !side {
 			position++
 		}
-		
+
 		insertSet(current.Children, sibling.Children[:sibling.pointer+1], position)
 	}
 
@@ -369,8 +404,6 @@ func transfer(parent, current positionStr, sibling *Node, leafInternal, side boo
 	childInsertPosition := current.node.pointer
 	insertPosition := current.node.pointer
 
-	// fmt.Println(key)
-
 	if side {
 		itemIndex = sibling.pointer - 1
 		childInsertPosition = 0
@@ -394,7 +427,6 @@ func transfer(parent, current positionStr, sibling *Node, leafInternal, side boo
 			insert(current.node.Children, sibling.Children[0], current.node.pointer) //check right side -> itemIndex+1(work for left) -> itemIndex
 			deleteElement(sibling.Children, 0, 1)
 		} else {
-			// deleteElement(current.node.Children, current.position+1, 1)
 			insert(current.node.Children, sibling.Children[itemIndex+1], childInsertPosition) //check right side -> itemIndex+1(work for left) -> itemIndex
 		}
 	}
@@ -403,7 +435,7 @@ func transfer(parent, current positionStr, sibling *Node, leafInternal, side boo
 	sibling.pointer -= deleteElement(sibling.items, itemIndex, 1)
 }
 
-func (t *Tree) TestFunc() {
+func (t *Tree) TestFunc() int {
 	current := t.root
 	for current.Children[0] != nil {
 		current = current.Children[0]
@@ -412,13 +444,15 @@ func (t *Tree) TestFunc() {
 	var counter int
 
 	for current != nil {
-		for _, value := range current.items[:current.pointer] {
+		for range current.items[:current.pointer] {
 			counter++
-			fmt.Println(counter, value)
+			// fmt.Println(counter, value)
 		}
-		fmt.Println("======")
+		// fmt.Println("======")
 		current = current.nextNodeR
 	}
+
+	return counter
 }
 
 func (t *Tree) GetRoot() *Node {
