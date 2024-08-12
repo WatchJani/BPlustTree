@@ -9,16 +9,14 @@ type KeyType interface {
 	int | string | float64 | float32 | int16 | int8 | int32 | int64
 }
 
+type Tree[K KeyType, V any] struct {
+	root   *Node[K, V]
+	degree int
+}
+
 type item[K KeyType, V any] struct {
 	key   K
 	value V
-}
-
-func newItem[K KeyType, V any](key K, value V) item[K, V] {
-	return item[K, V]{
-		key:   key,
-		value: value,
-	}
 }
 
 type Node[K KeyType, V any] struct {
@@ -27,6 +25,22 @@ type Node[K KeyType, V any] struct {
 	nextNodeL *Node[K, V]
 	nextNodeR *Node[K, V]
 	pointer   int
+}
+
+type Stack[K KeyType, V any] struct {
+	store []positionStr[K, V]
+}
+
+type positionStr[K KeyType, V any] struct {
+	node     *Node[K, V]
+	position int
+}
+
+func newItem[K KeyType, V any](key K, value V) item[K, V] {
+	return item[K, V]{
+		key:   key,
+		value: value,
+	}
 }
 
 func newNode[K KeyType, V any](degree int) Node[K, V] {
@@ -42,11 +56,6 @@ func (n *Node[K, V]) delete() {
 	n.pointer = 0
 	n.nextNodeL = nil
 	n.nextNodeR = nil
-}
-
-type Tree[K KeyType, V any] struct {
-	root   *Node[K, V]
-	degree int
 }
 
 func New[K KeyType, V any](degree int) *Tree[K, V] {
@@ -79,15 +88,6 @@ func (n *Node[K, V]) search(target K) (int, bool) {
 	}
 
 	return low, false
-}
-
-type Stack[K KeyType, V any] struct {
-	store []positionStr[K, V]
-}
-
-type positionStr[K KeyType, V any] struct {
-	node     *Node[K, V]
-	position int
 }
 
 func newStack[K KeyType, V any]() Stack[K, V] {
@@ -139,12 +139,11 @@ func (t *Tree[K, V]) Insert(key K, value V) {
 		return
 	}
 
-	//insert to leaf and update state
 	if middleKey, nodeChildren := insertLeaf(current.node, position, t.degree, item); nodeChildren != nil {
 		for {
-			temp := current //right leaf
+			temp := current
 
-			stack, err := stack.Pop() //get parent
+			stack, err := stack.Pop()
 			if err != nil {
 				current = temp
 				break
@@ -152,11 +151,10 @@ func (t *Tree[K, V]) Insert(key K, value V) {
 
 			parent := stack.node
 
-			//add to parent new item
 			parent.pointer += insert(parent.items, middleKey, stack.position)
 			chIndex := childrenIndex(middleKey.key, parent.items[stack.position].key, stack.position)
-			//make good link
-			insert(parent.Children, nodeChildren, chIndex) //insert pointer on children
+
+			insert(parent.Children, nodeChildren, chIndex)
 			if parent.pointer < t.degree {
 				return
 			}
@@ -164,7 +162,6 @@ func (t *Tree[K, V]) Insert(key K, value V) {
 			middle := parent.pointer / 2
 			middleKey = parent.items[middle]
 
-			//split
 			newNode := newNode[K, V](t.degree)
 			newNode.pointer += migrate(newNode.items, parent.items[:middle], 0) //migrate half element to left child node
 			migrate(newNode.Children, parent.Children[:middle+1], 0)
@@ -173,7 +170,7 @@ func (t *Tree[K, V]) Insert(key K, value V) {
 			migrate(parent.Children, parent.Children[middle+1:], 0)
 			nodeChildren = &newNode
 
-			current = stack //fix this part
+			current = stack
 		}
 
 		rootNode := newNode[K, V](t.degree)
@@ -210,29 +207,27 @@ func insertLeaf[K KeyType, V any](current *Node[K, V], position, degree int, ite
 	current.pointer += insert(current.items, item, position)
 
 	if current.pointer < degree {
-		return item, nil //
+		return item, nil
 	}
 
-	//Split
 	newNode := newNode[K, V](degree)
-	middle := degree / 2 //Check
+	middle := degree / 2
 
 	newNode.pointer += migrate(newNode.items, current.items[:middle], 0)
 	current.pointer -= deleteElement(current.items, 0, current.pointer-middle-degree%2)
 
 	//update links between leafs
 	if current.nextNodeL != nil {
-		newNode.nextNodeL = current.nextNodeL  //left connection
-		current.nextNodeL.nextNodeR = &newNode //right connection prevues left node to new node
+		newNode.nextNodeL = current.nextNodeL
+		current.nextNodeL.nextNodeR = &newNode
 	}
 
-	current.nextNodeL = &newNode //left connection
-	newNode.nextNodeR = current  //right connection
+	current.nextNodeL = &newNode
+	newNode.nextNodeR = current
 
 	return current.items[0], &newNode
 }
 
-// check //work fine
 func minAllowed(degree, numElement int) bool {
 	return (degree-1)/2 <= numElement
 }
@@ -251,8 +246,8 @@ func findLeaf[K KeyType, V any](root *Node[K, V], stack *Stack[K, V], key K) (in
 }
 
 func (t *Tree[K, V]) Delete(key K) error {
-	stack := newStack[K, V]()                 //create stack
-	_, found := findLeaf(t.root, &stack, key) //fill stack
+	stack := newStack[K, V]()
+	_, found := findLeaf(t.root, &stack, key)
 
 	if !found {
 		return fmt.Errorf("key %v is not exist", key)
@@ -290,7 +285,6 @@ func (t *Tree[K, V]) Delete(key K) error {
 	}
 
 	if t.root.pointer == 0 && len(t.root.Children) > 0 {
-		// If the root is empty, promote the first child as the new root
 		if t.root.Children[0] != nil {
 			t.root = t.root.Children[0]
 		} else {
@@ -298,7 +292,6 @@ func (t *Tree[K, V]) Delete(key K) error {
 		}
 	}
 
-	//update root
 	return nil
 }
 
@@ -313,7 +306,6 @@ func siblingExist[K KeyType, V any](parent positionStr[K, V], index int) (*Node[
 	return sibling, true
 }
 
-// return sibling, side and [transfer/merge]
 func sibling[K KeyType, V any](parent positionStr[K, V], degree int) (*Node[K, V], bool, bool) {
 	var (
 		potential *Node[K, V]
@@ -329,7 +321,7 @@ func sibling[K KeyType, V any](parent positionStr[K, V], degree int) (*Node[K, V
 	}
 
 	if sibling, isExist := siblingExist(parent, +1); isExist {
-		if minAllowed(degree, sibling.pointer-1) { //When we delete item -> -1
+		if minAllowed(degree, sibling.pointer-1) {
 			return sibling, false, true
 		}
 
@@ -374,7 +366,6 @@ func merge[K KeyType, V any](current, sibling *Node[K, V], parent positionStr[K,
 			}
 		}
 	} else {
-		//add parent element from
 		current.pointer += insert(current.items, parentElement, position)
 
 		if !side {
@@ -384,8 +375,7 @@ func merge[K KeyType, V any](current, sibling *Node[K, V], parent positionStr[K,
 		insertSet(current.Children, sibling.Children[:sibling.pointer+1], position)
 	}
 
-	//delete parent element
-	if side { //left side sibling delete
+	if side {
 		deleteElement(parent.node.Children, parent.position-1, 1)
 	} else {
 		deleteElement(parent.node.Children, parent.position+1, 1)
@@ -434,7 +424,6 @@ func transfer[K KeyType, V any](parent, current positionStr[K, V], sibling *Node
 		}
 	}
 
-	//delete sibling element
 	sibling.pointer -= deleteElement(sibling.items, itemIndex, 1)
 }
 
