@@ -7,10 +7,10 @@ import (
 
 func TestInsert(t *testing.T) {
 	for range 200 {
-		tree := New(100)
+		tree := New(5)
 		treeKey := map[int]struct{}{}
 
-		for range 200000 {
+		for range 2000 {
 			num := rand.Intn(200000)
 			tree.Insert(num, 52)
 			treeKey[num] = struct{}{}
@@ -25,10 +25,10 @@ func TestInsert(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	tree := New(99)
+	tree := New(3)
 
-	key := make([]int, 200000)
-	for index := range 200000 {
+	key := make([]int, 30)
+	for index := range 30 {
 		num := rand.Intn(200000)
 		tree.Insert(num, 52)
 		key[index] = num

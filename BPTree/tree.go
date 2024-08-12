@@ -152,12 +152,11 @@ func (t *Tree) Insert(key, value int) {
 			chIndex := childrenIndex(middleKey.key, parent.items[stack.position].key, stack.position)
 			//make good link
 			insert(parent.Children, nodeChildren, chIndex) //insert pointer on children
-
 			if parent.pointer < t.degree {
 				return
 			}
 
-			middle := t.degree / 2
+			middle := parent.pointer / 2
 			middleKey = parent.items[middle]
 
 			//split
@@ -165,9 +164,8 @@ func (t *Tree) Insert(key, value int) {
 			newNode.pointer += migrate(newNode.items, parent.items[:middle], 0) //migrate half element to left child node
 			migrate(newNode.Children, parent.Children[:middle+1], 0)
 
-			parent.pointer -= deleteElement(parent.items, 0, parent.pointer-middle)
-			migrate(parent.Children, parent.Children[middle+t.degree%2:], 0)
-
+			parent.pointer -= deleteElement(parent.items, 0, parent.pointer-middle+1-t.degree%2) // parent.pointer-middle+1-t.degree%2
+			migrate(parent.Children, parent.Children[middle+1:], 0)                   //
 			nodeChildren = &newNode
 
 			current = stack //fix this part
@@ -444,11 +442,11 @@ func (t *Tree) TestFunc() int {
 	var counter int
 
 	for current != nil {
-		for range current.items[:current.pointer] {
+		for _, value := range current.items[:current.pointer] {
 			counter++
-			// fmt.Println(counter, value)
+			fmt.Println(counter, value)
 		}
-		// fmt.Println("======")
+		fmt.Println("======")
 		current = current.nextNodeR
 	}
 

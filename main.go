@@ -3,24 +3,25 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"root/BPTree"
 )
 
 func main() {
 
 	//need to fix delete with 4
-	tree := BPTree.New(99)
+	tree := BPTree.New(5)
 
 	myMap := map[int]struct{}{}
 
-	key := make([]int, 30)
+	key := []int{8, 5, 15, 6, 16, 17, 3, 11, 4, 19, 13, 16, 13, 10, 15, 18, 9, 1, 5, 4}
 
-	for index := range key {
-		num := rand.Intn(30)
-		fmt.Println(num)
-		key[index] = num
-	}
+	// 8, 5, 15, 6, 16, 17, 3, 11, 4, 19, 13, 10, 18, 9, 1
+
+	// for index := range key {
+	// 	num := rand.Intn(20)
+	// 	fmt.Println(num)
+	// 	key[index] = num
+	// }
 
 	for _, num := range key {
 		tree.Insert(num, 52)
@@ -36,5 +37,5 @@ func main() {
 	fmt.Println("==========================================================")
 	tree.TestFunc()
 	root := tree.GetRoot()
-	fmt.Println(root.Children[4])
+	fmt.Println(root.Children[1])
 }
