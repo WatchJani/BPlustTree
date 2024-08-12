@@ -26,16 +26,17 @@ go get github.com/WatchJani/BPlustTree
 
 1. **Go Code Block**: The Go code is enclosed in triple backticks with `go` specified for syntax highlighting:
 
-    ```go
+```go
     package main
 
-    import (
+import (
 	"fmt"
 	"log"
 
-	t "github.com/WatchJani/BPlustTree")
+	t "github.com/WatchJani/BPlustTree"
+)
 
-    func main() {
+func main() {
 	BPTree := t.New[int, int](50)
 
 	BPTree.Insert(123, 123)
@@ -50,16 +51,15 @@ go get github.com/WatchJani/BPlustTree
 	if err := BPTree.Delete(123); err != nil {
 		log.Println(err)
 	}
-    }
-    ```
+}
+
+```
 
 2. **Markdown Sections**: Standard Markdown syntax is used for headings (`#`, `##`), lists, and other text formatting.
 
 3. **Shell Commands**: For shell commands like `go get`, use triple backticks with `sh` for shell syntax highlighting:
-    ```markdown
     ```sh
     go get github.com/yourusername/myproject
-    ```
     ```
 
 ### Output:
