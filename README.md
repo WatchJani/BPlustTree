@@ -1,7 +1,7 @@
 # Go B+ Tree Library
 
-[![GoDoc](https://godoc.org/github.com/yourusername/bplustree?status.svg)](https://pkg.go.dev/github.com/yourusername/bplustree)
-[![Go Report Card](https://goreportcard.com/badge/github.com/yourusername/bplustree)](https://goreportcard.com/report/github.com/yourusername/bplustree)
+[![GoDoc](https://godoc.org/github.com/WatchJani/BPlustTree?status.svg)](https://pkg.go.dev/github.com/yourusername/bplustree)
+[![Go Report Card](https://goreportcard.com/badge/github.com/WatchJani/BPlustTree)](https://goreportcard.com/report/github.com/yourusername/bplustree)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A high-performance, thread-safe implementation of the B+ Tree data structure in Go. Ideal for database indexing, sorted data management, and efficient range queries.
