@@ -1,6 +1,7 @@
 package BPTree
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 )
@@ -49,7 +50,7 @@ func TestDelete(t *testing.T) {
 }
 
 // 300ns
-func BenchmarkInsertBPTree(b *testing.B) {
+func BenchmarkInsertIntBPTree(b *testing.B) {
 	b.StopTimer()
 
 	tree := New[int, int](50)
@@ -58,5 +59,17 @@ func BenchmarkInsertBPTree(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		tree.Insert(rand.Intn(100000), 5)
+	}
+}
+
+func BenchmarkInsertStringBPTree(b *testing.B) {
+	b.StopTimer()
+
+	tree := New[string, int](50)
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		tree.Insert(fmt.Sprintf("%d", rand.Intn(100000)), 5)
 	}
 }
