@@ -5,34 +5,34 @@ import (
 	"fmt"
 )
 
-type item struct {
-	key   int
-	value int
+type item[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any] struct {
+	key   K
+	value V
 }
 
-func newItem(key, value int) item {
-	return item{
+func newItem[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](key K, value V) item[K, V] {
+	return item[K, V]{
 		key:   key,
 		value: value,
 	}
 }
 
-type Node struct {
-	items     []item
-	Children  []*Node
-	nextNodeL *Node
-	nextNodeR *Node
+type Node[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any] struct {
+	items     []item[K, V]
+	Children  []*Node[K, V]
+	nextNodeL *Node[K, V]
+	nextNodeR *Node[K, V]
 	pointer   int
 }
 
-func newNode(degree int) Node {
-	return Node{
-		items:    make([]item, degree+1),
-		Children: make([]*Node, degree+2),
+func newNode[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](degree int) Node[K, V] {
+	return Node[K, V]{
+		items:    make([]item[K, V], degree+1),
+		Children: make([]*Node[K, V], degree+2),
 	}
 }
 
-func (n *Node) delete() {
+func (n *Node[K, V]) delete() {
 	n.items = nil
 	n.Children = nil
 	n.pointer = 0
@@ -40,26 +40,26 @@ func (n *Node) delete() {
 	n.nextNodeR = nil
 }
 
-type Tree struct {
-	root   *Node
+type Tree[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any] struct {
+	root   *Node[K, V]
 	degree int
 }
 
-func New(degree int) *Tree {
+func New[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](degree int) *Tree[K, V] {
 	if degree < 3 {
 		degree = 3
 	}
 
-	return &Tree{
+	return &Tree[K, V]{
 		degree: degree,
-		root: &Node{
-			items:    make([]item, degree+1),
-			Children: make([]*Node, degree+2),
+		root: &Node[K, V]{
+			items:    make([]item[K, V], degree+1),
+			Children: make([]*Node[K, V], degree+2),
 		},
 	}
 }
 
-func (n *Node) search(target int) (int, bool) {
+func (n *Node[K, V]) search(target K) (int, bool) {
 	low, high := 0, n.pointer-1
 
 	for low <= high {
@@ -77,31 +77,31 @@ func (n *Node) search(target int) (int, bool) {
 	return low, false
 }
 
-type Stack struct {
-	store []positionStr
+type Stack[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any] struct {
+	store []positionStr[K, V]
 }
 
-type positionStr struct {
-	node     *Node
+type positionStr[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any] struct {
+	node     *Node[K, V]
 	position int
 }
 
-func newStack() Stack {
-	return Stack{
-		store: make([]positionStr, 0, 4),
+func newStack[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any]() Stack[K, V] {
+	return Stack[K, V]{
+		store: make([]positionStr[K, V], 0, 4),
 	}
 }
 
-func (s *Stack) Push(node *Node, position int) {
-	s.store = append(s.store, positionStr{
+func (s *Stack[K, V]) Push(node *Node[K, V], position int) {
+	s.store = append(s.store, positionStr[K, V]{
 		node:     node,
 		position: position,
 	})
 }
 
-func (s *Stack) Pop() (positionStr, error) {
+func (s *Stack[K, V]) Pop() (positionStr[K, V], error) {
 	if len(s.store) == 0 {
-		return positionStr{}, errors.New("stack is empty")
+		return positionStr[K, V]{}, errors.New("stack is empty")
 	}
 
 	pop := s.store[len(s.store)-1]
@@ -109,7 +109,7 @@ func (s *Stack) Pop() (positionStr, error) {
 	return pop, nil
 }
 
-func (t *Tree) Find(key int) (int, error) {
+func (t *Tree[K, V]) Find(key K) (V, error) {
 	for next := t.root; next != nil; {
 		index, found := next.search(key)
 
@@ -120,11 +120,12 @@ func (t *Tree) Find(key int) (int, error) {
 		next = next.Children[index]
 	}
 
-	return -1, fmt.Errorf("key %v not found", key)
+	var res V
+	return res, fmt.Errorf("key %v not found", key)
 }
 
-func (t *Tree) Insert(key, value int) {
-	stack, item := newStack(), newItem(key, value)
+func (t *Tree[K, V]) Insert(key K, value V) {
+	stack, item := newStack[K, V](), newItem(key, value)
 	position, found := findLeaf(t.root, &stack, key)
 
 	current, _ := stack.Pop()
@@ -160,18 +161,18 @@ func (t *Tree) Insert(key, value int) {
 			middleKey = parent.items[middle]
 
 			//split
-			newNode := newNode(t.degree)
+			newNode := newNode[K, V](t.degree)
 			newNode.pointer += migrate(newNode.items, parent.items[:middle], 0) //migrate half element to left child node
 			migrate(newNode.Children, parent.Children[:middle+1], 0)
 
-			parent.pointer -= deleteElement(parent.items, 0, parent.pointer-middle+1-t.degree&1) // parent.pointer-middle+1-t.degree%2
-			migrate(parent.Children, parent.Children[middle+1:], 0)                              //
+			parent.pointer -= deleteElement(parent.items, 0, parent.pointer-middle+1-t.degree&1)
+			migrate(parent.Children, parent.Children[middle+1:], 0)
 			nodeChildren = &newNode
 
 			current = stack //fix this part
 		}
 
-		rootNode := newNode(t.degree)
+		rootNode := newNode[K, V](t.degree)
 		rootNode.pointer += insert(rootNode.items, middleKey, 0)
 		rootNode.Children[0] = nodeChildren
 		rootNode.Children[1] = current.node
@@ -179,7 +180,7 @@ func (t *Tree) Insert(key, value int) {
 	}
 }
 
-func childrenIndex(key, value, index int) int {
+func childrenIndex[K int | string | float64 | float32 | int16 | int8 | int32 | int64](key, value K, index int) int {
 	if value < key {
 		return index + 1
 	}
@@ -201,7 +202,7 @@ func deleteElement[T any](list []T, position, deletion int) int {
 	return deletion
 }
 
-func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
+func insertLeaf[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](current *Node[K, V], position, degree int, item item[K, V]) (item[K, V], *Node[K, V]) {
 	current.pointer += insert(current.items, item, position)
 
 	if current.pointer < degree {
@@ -209,7 +210,7 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 	}
 
 	//Split
-	newNode := newNode(degree)
+	newNode := newNode[K, V](degree)
 	middle := degree / 2 //Check
 
 	newNode.pointer += migrate(newNode.items, current.items[:middle], 0)
@@ -232,7 +233,7 @@ func minAllowed(degree, numElement int) bool {
 	return (degree-1)/2 <= numElement
 }
 
-func findLeaf(root *Node, stack *Stack, key int) (int, bool) {
+func findLeaf[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](root *Node[K, V], stack *Stack[K, V], key K) (int, bool) {
 	position, found := 0, false
 
 	for current := root; current != nil; {
@@ -245,8 +246,8 @@ func findLeaf(root *Node, stack *Stack, key int) (int, bool) {
 	return position, found
 }
 
-func (t *Tree) Delete(key int) error {
-	stack := newStack()                       //create stack
+func (t *Tree[K, V]) Delete(key K) error {
+	stack := newStack[K, V]()                 //create stack
 	_, found := findLeaf(t.root, &stack, key) //fill stack
 
 	if !found {
@@ -297,7 +298,7 @@ func (t *Tree) Delete(key int) error {
 	return nil
 }
 
-func siblingExist(parent positionStr, index int) (*Node, bool) {
+func siblingExist[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](parent positionStr[K, V], index int) (*Node[K, V], bool) {
 	index = parent.position + index
 
 	if index < 0 || index > parent.node.pointer {
@@ -309,9 +310,9 @@ func siblingExist(parent positionStr, index int) (*Node, bool) {
 }
 
 // return sibling, side and [transfer/merge]
-func sibling(parent positionStr, degree int) (*Node, bool, bool) {
+func sibling[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](parent positionStr[K, V], degree int) (*Node[K, V], bool, bool) {
 	var (
-		potential *Node
+		potential *Node[K, V]
 		side      bool
 	)
 
@@ -352,7 +353,7 @@ func indexElement(index int) int {
 	return index
 }
 
-func merge(current, sibling *Node, parent positionStr, leafInternal, side bool) {
+func merge[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](current, sibling *Node[K, V], parent positionStr[K, V], leafInternal, side bool) {
 	parentElement := parent.node.items[indexElement(parent.position)]
 	position := sideFn(side, current.pointer)
 
@@ -396,7 +397,7 @@ func insertSet[T any](list []T, insert []T, position int) int {
 	return copy(list[position:], insert)
 }
 
-func transfer(parent, current positionStr, sibling *Node, leafInternal, side bool) {
+func transfer[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](parent, current positionStr[K, V], sibling *Node[K, V], leafInternal, side bool) {
 	itemIndex := 0
 	parentPosition := parent.position - 1
 	childInsertPosition := current.node.pointer
@@ -433,7 +434,7 @@ func transfer(parent, current positionStr, sibling *Node, leafInternal, side boo
 	sibling.pointer -= deleteElement(sibling.items, itemIndex, 1)
 }
 
-func (t *Tree) TestFunc() int {
+func (t *Tree[K, V]) TestFunc() int {
 	current := t.root
 	for current.Children[0] != nil {
 		current = current.Children[0]
@@ -453,6 +454,6 @@ func (t *Tree) TestFunc() int {
 	return counter
 }
 
-func (t *Tree) GetRoot() *Node {
+func (t *Tree[K, V]) GetRoot() *Node[K, V] {
 	return t.root
 }

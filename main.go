@@ -9,7 +9,7 @@ import (
 func main() {
 
 	//need to fix delete with 4
-	tree := BPTree.New(4)
+	tree := BPTree.New[int, int](4)
 
 	myMap := map[int]struct{}{}
 

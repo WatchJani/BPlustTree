@@ -7,7 +7,7 @@ import (
 
 func TestInsert(t *testing.T) {
 	for range 200 {
-		tree := New(5)
+		tree := New[int, int](5)
 		treeKey := map[int]struct{}{}
 
 		for range 2000 {
@@ -26,7 +26,7 @@ func TestInsert(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	for range 200 {
-		tree := New(5)
+		tree := New[int, int](5)
 
 		size := rand.Intn(10000)
 
@@ -52,7 +52,7 @@ func TestDelete(t *testing.T) {
 func BenchmarkInsertBPTree(b *testing.B) {
 	b.StopTimer()
 
-	tree := New(50)
+	tree := New[int, int](50)
 
 	b.StartTimer()
 
