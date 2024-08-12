@@ -20,4 +20,4 @@ A high-performance, thread-safe implementation of the B+ Tree data structure in 
 To install the package, use `go get`:
 
 ```sh
-go get github.com/WatchJani/bplustree
+go get github.com/WatchJani/BPlustTree
