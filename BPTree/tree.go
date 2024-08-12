@@ -5,19 +5,23 @@ import (
 	"fmt"
 )
 
-type item[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any] struct {
+type KeyType interface {
+	int | string | float64 | float32 | int16 | int8 | int32 | int64
+}
+
+type item[K KeyType, V any] struct {
 	key   K
 	value V
 }
 
-func newItem[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](key K, value V) item[K, V] {
+func newItem[K KeyType, V any](key K, value V) item[K, V] {
 	return item[K, V]{
 		key:   key,
 		value: value,
 	}
 }
 
-type Node[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any] struct {
+type Node[K KeyType, V any] struct {
 	items     []item[K, V]
 	Children  []*Node[K, V]
 	nextNodeL *Node[K, V]
@@ -25,7 +29,7 @@ type Node[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V a
 	pointer   int
 }
 
-func newNode[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](degree int) Node[K, V] {
+func newNode[K KeyType, V any](degree int) Node[K, V] {
 	return Node[K, V]{
 		items:    make([]item[K, V], degree+1),
 		Children: make([]*Node[K, V], degree+2),
@@ -40,12 +44,12 @@ func (n *Node[K, V]) delete() {
 	n.nextNodeR = nil
 }
 
-type Tree[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any] struct {
+type Tree[K KeyType, V any] struct {
 	root   *Node[K, V]
 	degree int
 }
 
-func New[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](degree int) *Tree[K, V] {
+func New[K KeyType, V any](degree int) *Tree[K, V] {
 	if degree < 3 {
 		degree = 3
 	}
@@ -77,16 +81,16 @@ func (n *Node[K, V]) search(target K) (int, bool) {
 	return low, false
 }
 
-type Stack[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any] struct {
+type Stack[K KeyType, V any] struct {
 	store []positionStr[K, V]
 }
 
-type positionStr[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any] struct {
+type positionStr[K KeyType, V any] struct {
 	node     *Node[K, V]
 	position int
 }
 
-func newStack[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any]() Stack[K, V] {
+func newStack[K KeyType, V any]() Stack[K, V] {
 	return Stack[K, V]{
 		store: make([]positionStr[K, V], 0, 4),
 	}
@@ -180,7 +184,7 @@ func (t *Tree[K, V]) Insert(key K, value V) {
 	}
 }
 
-func childrenIndex[K int | string | float64 | float32 | int16 | int8 | int32 | int64](key, value K, index int) int {
+func childrenIndex[K KeyType](key, value K, index int) int {
 	if value < key {
 		return index + 1
 	}
@@ -202,7 +206,7 @@ func deleteElement[T any](list []T, position, deletion int) int {
 	return deletion
 }
 
-func insertLeaf[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](current *Node[K, V], position, degree int, item item[K, V]) (item[K, V], *Node[K, V]) {
+func insertLeaf[K KeyType, V any](current *Node[K, V], position, degree int, item item[K, V]) (item[K, V], *Node[K, V]) {
 	current.pointer += insert(current.items, item, position)
 
 	if current.pointer < degree {
@@ -233,7 +237,7 @@ func minAllowed(degree, numElement int) bool {
 	return (degree-1)/2 <= numElement
 }
 
-func findLeaf[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](root *Node[K, V], stack *Stack[K, V], key K) (int, bool) {
+func findLeaf[K KeyType, V any](root *Node[K, V], stack *Stack[K, V], key K) (int, bool) {
 	position, found := 0, false
 
 	for current := root; current != nil; {
@@ -298,7 +302,7 @@ func (t *Tree[K, V]) Delete(key K) error {
 	return nil
 }
 
-func siblingExist[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](parent positionStr[K, V], index int) (*Node[K, V], bool) {
+func siblingExist[K KeyType, V any](parent positionStr[K, V], index int) (*Node[K, V], bool) {
 	index = parent.position + index
 
 	if index < 0 || index > parent.node.pointer {
@@ -310,7 +314,7 @@ func siblingExist[K int | string | float64 | float32 | int16 | int8 | int32 | in
 }
 
 // return sibling, side and [transfer/merge]
-func sibling[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](parent positionStr[K, V], degree int) (*Node[K, V], bool, bool) {
+func sibling[K KeyType, V any](parent positionStr[K, V], degree int) (*Node[K, V], bool, bool) {
 	var (
 		potential *Node[K, V]
 		side      bool
@@ -353,7 +357,7 @@ func indexElement(index int) int {
 	return index
 }
 
-func merge[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](current, sibling *Node[K, V], parent positionStr[K, V], leafInternal, side bool) {
+func merge[K KeyType, V any](current, sibling *Node[K, V], parent positionStr[K, V], leafInternal, side bool) {
 	parentElement := parent.node.items[indexElement(parent.position)]
 	position := sideFn(side, current.pointer)
 
@@ -397,7 +401,7 @@ func insertSet[T any](list []T, insert []T, position int) int {
 	return copy(list[position:], insert)
 }
 
-func transfer[K int | string | float64 | float32 | int16 | int8 | int32 | int64, V any](parent, current positionStr[K, V], sibling *Node[K, V], leafInternal, side bool) {
+func transfer[K KeyType, V any](parent, current positionStr[K, V], sibling *Node[K, V], leafInternal, side bool) {
 	itemIndex := 0
 	parentPosition := parent.position - 1
 	childInsertPosition := current.node.pointer
