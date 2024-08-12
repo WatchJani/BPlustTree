@@ -164,8 +164,8 @@ func (t *Tree) Insert(key, value int) {
 			newNode.pointer += migrate(newNode.items, parent.items[:middle], 0) //migrate half element to left child node
 			migrate(newNode.Children, parent.Children[:middle+1], 0)
 
-			parent.pointer -= deleteElement(parent.items, 0, parent.pointer-middle+1-t.degree%2) // parent.pointer-middle+1-t.degree%2
-			migrate(parent.Children, parent.Children[middle+1:], 0)                   //
+			parent.pointer -= deleteElement(parent.items, 0, parent.pointer-middle+1-t.degree&1) // parent.pointer-middle+1-t.degree%2
+			migrate(parent.Children, parent.Children[middle+1:], 0)                              //
 			nodeChildren = &newNode
 
 			current = stack //fix this part
@@ -229,7 +229,7 @@ func insertLeaf(current *Node, position, degree int, item item) (item, *Node) {
 
 // check //work fine
 func minAllowed(degree, numElement int) bool {
-	return (degree/2)+degree%2-1 <= numElement
+	return (degree-1)/2 <= numElement
 }
 
 func findLeaf(root *Node, stack *Stack, key int) (int, bool) {

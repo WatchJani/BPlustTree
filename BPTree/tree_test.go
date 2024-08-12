@@ -25,28 +25,34 @@ func TestInsert(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	tree := New(3)
+	for range 200 {
+		tree := New(5)
 
-	key := make([]int, 30)
-	for index := range 30 {
-		num := rand.Intn(200000)
-		tree.Insert(num, 52)
-		key[index] = num
+		size := rand.Intn(10000)
+
+		key := make([]int, size)
+		for index := range size {
+			num := rand.Intn(size)
+			tree.Insert(num, 52)
+			key[index] = num
+		}
+
+		for _, key := range key {
+			tree.Delete(key)
+		}
+
+		if tree.root.pointer != 0 {
+			t.Errorf("all elements is not deleted from tree")
+		}
 	}
 
-	for _, key := range key {
-		tree.Delete(key)
-	}
-
-	if tree.root.pointer != 0 {
-		t.Errorf("all elements is not deleted from tree")
-	}
 }
 
+// 300ns
 func BenchmarkInsertBPTree(b *testing.B) {
 	b.StopTimer()
 
-	tree := New(99)
+	tree := New(50)
 
 	b.StartTimer()
 
