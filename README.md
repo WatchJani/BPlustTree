@@ -27,7 +27,7 @@ go get github.com/WatchJani/BPlustTree
 1. **Go Code Block**: The Go code is enclosed in triple backticks with `go` specified for syntax highlighting:
 
 ```go
-    package main
+package main
 
 import (
 	"fmt"
