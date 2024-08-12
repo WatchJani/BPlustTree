@@ -21,13 +21,38 @@ To install the package, use `go get`:
 
 ```sh
 go get github.com/WatchJani/BPlustTree
-
+```
 ### Explanation:
 
 1. **Go Code Block**: The Go code is enclosed in triple backticks with `go` specified for syntax highlighting:
     ```markdown
     ```go
-    // Go code here
+   package main
+
+import (
+	"fmt"
+	"log"
+
+	t "github.com/WatchJani/BPlustTree"
+)
+
+func main() {
+	BPTree := t.New[int, int](50)
+
+	BPTree.Insert(123, 123)
+
+	value, err := BPTree.Find(123)
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println(value)
+
+	if err := BPTree.Delete(123); err != nil {
+		log.Println(err)
+	}
+}
+
     ```
     ```
 
