@@ -30,10 +30,10 @@ go get github.com/WatchJani/BPlustTree
 package main
 
 import (
-	"fmt"
-	"log"
+    "fmt"
+    "log"
 
-	t "github.com/WatchJani/BPlustTree"
+    t "github.com/WatchJani/BPlustTree"
 )
 
 func main() {
