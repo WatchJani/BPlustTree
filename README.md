@@ -59,7 +59,7 @@ func main() {
 
 3. **Shell Commands**: For shell commands like `go get`, use triple backticks with `sh` for shell syntax highlighting:
     ```sh
-    go get github.com/yourusername/myproject
+    go get github.com/WatchJani/BPlustTree
     ```
 
 ### Output:
