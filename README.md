@@ -25,18 +25,17 @@ go get github.com/WatchJani/BPlustTree
 ### Explanation:
 
 1. **Go Code Block**: The Go code is enclosed in triple backticks with `go` specified for syntax highlighting:
-    ```markdown
-    ```go
-   package main
 
-import (
+    ```go
+    package main
+
+    import (
 	"fmt"
 	"log"
 
-	t "github.com/WatchJani/BPlustTree"
-)
+	t "github.com/WatchJani/BPlustTree")
 
-func main() {
+    func main() {
 	BPTree := t.New[int, int](50)
 
 	BPTree.Insert(123, 123)
@@ -51,9 +50,7 @@ func main() {
 	if err := BPTree.Delete(123); err != nil {
 		log.Println(err)
 	}
-}
-
-    ```
+    }
     ```
 
 2. **Markdown Sections**: Standard Markdown syntax is used for headings (`#`, `##`), lists, and other text formatting.
