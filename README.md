@@ -21,3 +21,24 @@ To install the package, use `go get`:
 
 ```sh
 go get github.com/WatchJani/BPlustTree
+
+### Explanation:
+
+1. **Go Code Block**: The Go code is enclosed in triple backticks with `go` specified for syntax highlighting:
+    ```markdown
+    ```go
+    // Go code here
+    ```
+    ```
+
+2. **Markdown Sections**: Standard Markdown syntax is used for headings (`#`, `##`), lists, and other text formatting.
+
+3. **Shell Commands**: For shell commands like `go get`, use triple backticks with `sh` for shell syntax highlighting:
+    ```markdown
+    ```sh
+    go get github.com/yourusername/myproject
+    ```
+    ```
+
+### Output:
+When rendered on GitHub, the example Go code will be syntax-highlighted, making it easier to read and understand. This approach is useful for providing clear and well-documented examples in your project's README file.
