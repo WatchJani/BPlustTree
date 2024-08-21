@@ -11,6 +11,7 @@ type KeyType interface {
 type Tree[K KeyType, V any] struct {
 	root   *Node[K, V]
 	degree int
+	deep   Stack[Stack[positionStr[K, V]]]
 }
 
 type item[K KeyType, V any] struct {
@@ -62,8 +63,18 @@ func New[K KeyType, V any](degree int) *Tree[K, V] {
 		degree = 3
 	}
 
+	maxParallelRead := 50 // max number of parallel reads
+	maxTreeDeep := 30
+
+	deep := newStack[Stack[positionStr[K, V]]](maxParallelRead)
+
+	for index := range deep.store {
+		deep.store[index] = newStack[positionStr[K, V]](maxTreeDeep) // deep = log2(number of elements)
+	}
+
 	return &Tree[K, V]{
 		degree: degree,
+		deep:   deep,
 		root: &Node[K, V]{
 			items:    make([]item[K, V], degree+1),
 			Children: make([]*Node[K, V], degree+2),
@@ -94,13 +105,6 @@ func newStack[T any](capacity int) Stack[T] {
 		store: make([]T, 0, capacity),
 	}
 }
-
-// func (s *Stack[K, V]) Push(node *Node[K, V], position int) {
-// 	s.store = append(s.store, positionStr[K, V]{
-// 		node:     node,
-// 		position: position,
-// 	})
-// }
 
 func (s *Stack[T]) Push(value T) {
 	s.store = append(s.store, value)
