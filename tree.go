@@ -1,7 +1,6 @@
 package BPTree
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -27,8 +26,8 @@ type Node[K KeyType, V any] struct {
 	pointer   int
 }
 
-type Stack[K KeyType, V any] struct {
-	store []positionStr[K, V]
+type Stack[T any] struct {
+	store []T
 }
 
 type positionStr[K KeyType, V any] struct {
@@ -90,27 +89,31 @@ func (n *Node[K, V]) search(target K) (int, bool) {
 	return low, false
 }
 
-func newStack[K KeyType, V any]() Stack[K, V] {
-	return Stack[K, V]{
-		store: make([]positionStr[K, V], 0, 4),
+func newStack[T any](capacity int) Stack[T] {
+	return Stack[T]{
+		store: make([]T, 0, capacity),
 	}
 }
 
-func (s *Stack[K, V]) Push(node *Node[K, V], position int) {
-	s.store = append(s.store, positionStr[K, V]{
-		node:     node,
-		position: position,
-	})
+// func (s *Stack[K, V]) Push(node *Node[K, V], position int) {
+// 	s.store = append(s.store, positionStr[K, V]{
+// 		node:     node,
+// 		position: position,
+// 	})
+// }
+
+func (s *Stack[T]) Push(value T) {
+	s.store = append(s.store, value)
 }
 
-func (s *Stack[K, V]) Pop() (positionStr[K, V], error) {
+func (s *Stack[T]) Pop() (T, error) {
 	if len(s.store) == 0 {
-		return positionStr[K, V]{}, errors.New("stack is empty")
+		var zeroValue T
+		return zeroValue, fmt.Errorf("stack is empty")
 	}
-
-	pop := s.store[len(s.store)-1]
+	value := s.store[len(s.store)-1]
 	s.store = s.store[:len(s.store)-1]
-	return pop, nil
+	return value, nil
 }
 
 func (t *Tree[K, V]) Find(key K) (V, error) {
@@ -129,7 +132,7 @@ func (t *Tree[K, V]) Find(key K) (V, error) {
 }
 
 func (t *Tree[K, V]) Insert(key K, value V) {
-	stack, item := newStack[K, V](), newItem(key, value)
+	stack, item := newStack[positionStr[K, V]](4), newItem(key, value)
 	position, found := findLeaf(t.root, &stack, key)
 
 	current, _ := stack.Pop()
@@ -226,12 +229,15 @@ func minAllowed(degree, numElement int) bool {
 	return (degree-1)/2 <= numElement
 }
 
-func findLeaf[K KeyType, V any](root *Node[K, V], stack *Stack[K, V], key K) (int, bool) {
+func findLeaf[K KeyType, V any](root *Node[K, V], stack *Stack[positionStr[K, V]], key K) (int, bool) {
 	position, found := 0, false
 
 	for current := root; current != nil; {
 		position, found = current.search(key)
-		stack.Push(current, position)
+		stack.Push(positionStr[K, V]{
+			current,
+			position,
+		})
 
 		current = current.Children[position]
 	}
@@ -240,7 +246,7 @@ func findLeaf[K KeyType, V any](root *Node[K, V], stack *Stack[K, V], key K) (in
 }
 
 func (t *Tree[K, V]) Delete(key K) error {
-	stack := newStack[K, V]()
+	stack := newStack[positionStr[K, V]](4)
 	_, found := findLeaf(t.root, &stack, key)
 
 	if !found {
