@@ -2,13 +2,14 @@ package BPTree
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"testing"
 )
 
 func TestInsert(t *testing.T) {
 	for range 200 {
-		tree := New[int, int](5)
+		tree := New[int, int](500)
 		treeKey := map[int]struct{}{}
 
 		for range 2000 {
@@ -27,7 +28,7 @@ func TestInsert(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	for range 200 {
-		tree := New[int, int](5)
+		tree := New[int, int](200)
 
 		size := rand.Intn(10000)
 
@@ -39,7 +40,9 @@ func TestDelete(t *testing.T) {
 		}
 
 		for _, key := range key {
-			tree.Delete(key)
+			if err := tree.Delete(key); err != nil {
+				log.Println(err)
+			}
 		}
 
 		if tree.root.pointer != 0 {
