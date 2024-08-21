@@ -438,9 +438,10 @@ func (t *Tree[K, V]) TestFunc() int {
 	for current != nil {
 		for _, value := range current.items[:current.pointer] {
 			counter++
-			fmt.Println(counter, value)
+			// fmt.Println(counter, value)
+			_ = value
 		}
-		fmt.Println("======")
+		// fmt.Println("======")
 		current = current.nextNodeR
 	}
 

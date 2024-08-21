@@ -73,3 +73,47 @@ func BenchmarkInsertStringBPTree(b *testing.B) {
 		tree.Insert(fmt.Sprintf("%d", rand.Intn(100000)), 5)
 	}
 }
+
+// 250ns  for 1_000_000 +
+func BenchmarkSearch(b *testing.B) {
+	b.StopTimer()
+
+	tree := New[int, int](500)
+
+	size := rand.Intn(1_000_000)
+
+	key := make([]int, size)
+	for index := range size {
+		num := rand.Intn(size)
+		tree.Insert(num, 52)
+		key[index] = num
+	}
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		tree.Find(key[rand.Intn(len(key)-1)])
+	}
+}
+
+// 485ns for 1_000_000 +
+func BenchmarkDelete(b *testing.B) {
+	b.StopTimer()
+
+	tree := New[int, int](500)
+
+	size := rand.Intn(1_000_000)
+
+	key := make([]int, size)
+	for index := range size {
+		num := rand.Intn(size)
+		tree.Insert(num, 52)
+		key[index] = num
+	}
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		tree.Delete(key[rand.Intn(len(key)-1)])
+	}
+}
