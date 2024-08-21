@@ -56,12 +56,12 @@ func TestDelete(t *testing.T) {
 func BenchmarkInsertIntBPTree(b *testing.B) {
 	b.StopTimer()
 
-	tree := New[int, int](50)
+	tree := New[int, int](500)
 
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		tree.Insert(rand.Intn(100000), 5)
+		tree.Insert(rand.Intn(1_0000_000), 5)
 	}
 }
 
