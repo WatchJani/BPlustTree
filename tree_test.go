@@ -28,7 +28,7 @@ func TestInsert(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	for range 200 {
-		tree := New[int, int](200)
+		tree := New[int, int](199)
 
 		size := rand.Intn(10000)
 
@@ -105,7 +105,7 @@ func BenchmarkDelete(b *testing.B) {
 
 	tree := New[int, int](500)
 
-	size := rand.Intn(1_000_000)
+	size := rand.Intn(100_000)
 
 	key := make([]int, size)
 	for index := range size {

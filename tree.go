@@ -136,7 +136,7 @@ func (t *Tree[K, V]) Find(key K) (V, error) {
 }
 
 func (t *Tree[K, V]) Insert(key K, value V) {
-	stack, item := newStack[positionStr[K, V]](4), newItem(key, value)
+	stack, item := newStack[positionStr[K, V]](30), newItem(key, value)
 	position, found := findLeaf(t.root, &stack, key)
 
 	current, _ := stack.Pop()
@@ -148,30 +148,36 @@ func (t *Tree[K, V]) Insert(key K, value V) {
 
 	if middleKey, nodeChildren := insertLeaf(current.node, position, t.degree, item); nodeChildren != nil {
 		for {
-			if nextCurrent, err := stack.Pop(); err != nil {
+			temp := current
+
+			stack, err := stack.Pop()
+			if err != nil {
+				current = temp
 				break
-			} else {
-				current = nextCurrent
 			}
 
-			current.node.pointer += insert(current.node.items, middleKey, current.position)
-			chIndex := childrenIndex(middleKey.key, current.node.items[current.position].key, current.position)
+			parent := stack.node
 
-			insert(current.node.Children, nodeChildren, chIndex)
-			if current.node.pointer < t.degree {
+			parent.pointer += insert(parent.items, middleKey, stack.position)
+			chIndex := childrenIndex(middleKey.key, parent.items[stack.position].key, stack.position)
+
+			insert(parent.Children, nodeChildren, chIndex)
+			if parent.pointer < t.degree {
 				return
 			}
 
-			middle := current.node.pointer / 2
-			middleKey = current.node.items[middle]
+			middle := parent.pointer / 2
+			middleKey = parent.items[middle]
 
 			newNode := newNode[K, V](t.degree)
-			newNode.pointer += migrate(newNode.items, current.node.items[:middle], 0) // migrate half elements to new node
-			migrate(newNode.Children, current.node.Children[:middle+1], 0)
+			newNode.pointer += migrate(newNode.items, parent.items[:middle], 0) //migrate half element to left child node
+			migrate(newNode.Children, parent.Children[:middle+1], 0)
 
-			current.node.pointer -= deleteElement(current.node.items, 0, current.node.pointer-middle+1-t.degree&1)
-			migrate(current.node.Children, current.node.Children[middle+1:], 0)
+			parent.pointer -= deleteElement(parent.items, 0, parent.pointer-middle+1-t.degree&1)
+			migrate(parent.Children, parent.Children[middle+1:], 0)
 			nodeChildren = &newNode
+
+			current = stack
 		}
 
 		rootNode := newNode[K, V](t.degree)
@@ -250,11 +256,11 @@ func findLeaf[K KeyType, V any](root *Node[K, V], stack *Stack[positionStr[K, V]
 }
 
 func (t *Tree[K, V]) Delete(key K) error {
-	stack := newStack[positionStr[K, V]](4)
+	stack := newStack[positionStr[K, V]](30)
 	_, found := findLeaf(t.root, &stack, key)
 
 	if !found {
-		return fmt.Errorf("key %v does not exist", key)
+		return fmt.Errorf("key %v is not exist", key)
 	}
 
 	current, _ := stack.Pop()
@@ -262,38 +268,38 @@ func (t *Tree[K, V]) Delete(key K) error {
 	for {
 		current.node.pointer -= deleteElement(current.node.items, indexElement(current.position), 1)
 
-		// Check if the current node has fallen below the minimum allowed size
 		if minAllowed(t.degree, current.node.pointer) || (found && t.root.pointer == 0) {
 			return nil
 		}
 
-		// Attempt to pop the parent node off the stack
-		if nextCurrent, err := stack.Pop(); err != nil {
+		temp := current //current
+		parent, err := stack.Pop()
+		if err != nil {
 			break
-		} else {
-			parent := nextCurrent
-			sibling, side, operation := sibling(parent, t.degree)
-
-			// Perform either a transfer or a merge based on the sibling node
-			if operation {
-				transfer(parent, current, sibling, found, side)
-				return nil
-			} else {
-				merge(current.node, sibling, parent, found, side)
-			}
-
-			// Update the current node to the parent node
-			current = parent
-
-			// Once found, we don't want to toggle it back
-			if found {
-				found = !found
-			}
 		}
+
+		sibling, side, operation := sibling(parent, t.degree)
+
+		if operation {
+			transfer(parent, temp, sibling, found, side)
+			return nil
+		} else {
+			merge(temp.node, sibling, parent, found, side)
+		}
+
+		if found {
+			found = !found
+		}
+
+		current = parent
 	}
 
 	if t.root.pointer == 0 && len(t.root.Children) > 0 {
-		t.root = t.root.Children[0]
+		if t.root.Children[0] != nil {
+			t.root = t.root.Children[0]
+		} else {
+			t.root = t.root.Children[1]
+		}
 	}
 
 	return nil
