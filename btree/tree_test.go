@@ -137,6 +137,6 @@ func BenchmarkRange(b *testing.B) {
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		tree.Range(11, 21)
+		tree.RangeUp(11, 21, "=>")
 	}
 }

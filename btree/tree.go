@@ -452,33 +452,75 @@ func (t *Tree[K, V]) GetRoot() *Node[K, V] {
 	return t.root
 }
 
-func (t *Tree[K, V]) Range(source, destination K) []item[K, V] {
+func (t *Tree[K, V]) RangeUp(source, destination K, command string) []item[K, V] {
 	var (
 		index   int
 		prevues *Node[K, V]
-		src     []item[K, V] = make([]item[K, V], 10)
+		src     []item[K, V] = make([]item[K, V], 0, 10)
 	)
 
 	for next := t.root; next != nil; {
 		index, _ := next.search(source)
-
 		prevues, next = next, next.Children[index]
 	}
 
 	index++
 
+	fmt.Println(prevues.items[index])
+
+	rangeFn, nextFn := CommandRange[K, V](command)
+
 	for prevues != nil {
 		for index < prevues.pointer {
-			if prevues.items[index].key > destination {
+			if rangeFn(index, destination, prevues) {
 				return src
 			}
 			src = append(src, prevues.items[index])
 			index++
 		}
 
-		prevues = prevues.nextNodeR
+		prevues = nextFn(prevues)
 		index = 0
 	}
 
 	return src
+}
+
+// for next := t.root; next != nil; {
+// 	index, found := next.search(key)
+
+// 	if found {
+// 		return next.items[index-1].value, nil
+// 	}
+
+// 	next = next.Children[index]
+// }
+
+func CommandRange[K KeyType, V any](command string) (func(int, K, *Node[K, V]) bool, func(*Node[K, V]) *Node[K, V]) {
+	switch command { // is range "<=" in relation to the source
+	case "<=":
+		return func(index int, destination K, node *Node[K, V]) bool {
+				return node.items[index].key > destination
+			}, func(n *Node[K, V]) *Node[K, V] {
+				return n.nextNodeL
+			}
+	case ">=":
+		return func(index int, destination K, node *Node[K, V]) bool {
+				return node.items[index].key < destination
+			}, func(n *Node[K, V]) *Node[K, V] {
+				return n.nextNodeR
+			}
+	case "<":
+		return func(index int, destination K, node *Node[K, V]) bool {
+				return node.items[index].key <= destination
+			}, func(n *Node[K, V]) *Node[K, V] {
+				return n.nextNodeL
+			}
+	default:
+		return func(index int, destination K, node *Node[K, V]) bool {
+				return node.items[index].key >= destination
+			}, func(n *Node[K, V]) *Node[K, V] {
+				return n.nextNodeR
+			}
+	}
 }

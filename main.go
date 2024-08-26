@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	tree := BPTree.New[int, int](10)
+	tree := BPTree.New[int, int](99)
 
 	store := make([]int, 100)
 
@@ -19,6 +19,8 @@ func main() {
 		tree.Insert(key, 52)
 	}
 
-	fmt.Println(tree.Range(11, 11))
+	val, _ := tree.Find(63)
+	fmt.Println(val)
 
+	fmt.Println(tree.RangeUp(63, 85, ">"))
 }
