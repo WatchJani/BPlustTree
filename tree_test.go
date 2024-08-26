@@ -9,7 +9,7 @@ import (
 
 func TestInsert(t *testing.T) {
 	for range 200 {
-		tree := New[int, int](500)
+		tree := New[int, int](499)
 		treeKey := map[int]struct{}{}
 
 		for range 2000 {
@@ -28,7 +28,7 @@ func TestInsert(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	for range 200 {
-		tree := New[int, int](199)
+		tree := New[int, int](5)
 
 		size := rand.Intn(10000)
 
@@ -49,26 +49,24 @@ func TestDelete(t *testing.T) {
 			t.Errorf("all elements is not deleted from tree")
 		}
 	}
-
 }
 
 // 300ns
 func BenchmarkInsertIntBPTree(b *testing.B) {
 	b.StopTimer()
 
-	tree := New[int, int](500)
-
+	tree := New[int, int](100)
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		tree.Insert(rand.Intn(1_0000_000), 5)
+		tree.Insert(rand.Intn(100_000), 5)
 	}
 }
 
 func BenchmarkInsertStringBPTree(b *testing.B) {
 	b.StopTimer()
 
-	tree := New[string, int](50)
+	tree := New[string, int](500)
 
 	b.StartTimer()
 
