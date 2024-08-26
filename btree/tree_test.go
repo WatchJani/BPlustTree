@@ -118,3 +118,25 @@ func BenchmarkDelete(b *testing.B) {
 		tree.Delete(key[rand.Intn(len(key)-1)])
 	}
 }
+
+func BenchmarkRange(b *testing.B) {
+	b.StopTimer()
+
+	tree := New[int, int](10)
+
+	store := make([]int, 100)
+
+	for index := range store {
+		store[index] = index
+	}
+
+	for _, key := range store {
+		tree.Insert(key, 52)
+	}
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		tree.Range(11, 21)
+	}
+}

@@ -451,3 +451,34 @@ func (t *Tree[K, V]) TestFunc() int {
 func (t *Tree[K, V]) GetRoot() *Node[K, V] {
 	return t.root
 }
+
+func (t *Tree[K, V]) Range(source, destination K) []item[K, V] {
+	var (
+		index   int
+		prevues *Node[K, V]
+		src     []item[K, V] = make([]item[K, V], 10)
+	)
+
+	for next := t.root; next != nil; {
+		index, _ := next.search(source)
+
+		prevues, next = next, next.Children[index]
+	}
+
+	index++
+
+	for prevues != nil {
+		for index < prevues.pointer {
+			if prevues.items[index].key > destination {
+				return src
+			}
+			src = append(src, prevues.items[index])
+			index++
+		}
+
+		prevues = prevues.nextNodeR
+		index = 0
+	}
+
+	return src
+}
